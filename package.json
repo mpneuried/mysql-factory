@@ -1,0 +1,38 @@
+{
+	"author": "mp <mp@tcs.de> (www.tcs.de)",
+	"name": "mysql-dynamo",
+	"description": "",
+	"keywords": [],
+	"tags": [],
+	"version": "0.0.1",
+	"homepage": "http://mpneuried.github.com/mysql-factory/",
+	"repository": {
+		"type": "git",
+		"url": "git://github.com/mpneuried/mysql-factory.git"
+	},
+	"engines": {
+		"node": "> 0.8.*"
+	},
+	"scripts": {
+		"test": "grunt build"
+ 	},
+ 	"main": "./index.js",
+	"dependencies": {
+		"extend": "*",
+		"async": "*",
+		"colors": "*",
+		"lodash": "*",
+		"bcrypt": "*",
+		"mysql": "2.x"
+	},
+	"devDependencies": {
+		"should": "*",
+
+		"grunt": "0.4.x",
+		"grunt-regarde": "*",
+		"grunt-contrib-coffee": "*",
+		"grunt-include-replace": "*",
+		"grunt-mocha-cli": "*",
+		"grunt-docker": "*"
+	}
+}

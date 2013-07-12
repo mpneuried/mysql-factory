@@ -22,7 +22,9 @@
 		"async": "*",
 		"colors": "*",
 		"lodash": "*",
+		"underscore.string": "*",
 		"bcrypt": "*",
+		"moment": "*",
 		"mysql": "2.x"
 	},
 	"devDependencies": {

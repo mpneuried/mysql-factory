@@ -3,6 +3,7 @@ _envVars = process.env
 
 module.exports  =
 	mysql:
+		showQueryTime: true
 		host: if _envVars.MYSQLFAC_TEST_HOST? then _envVars.MYSQLFAC_TEST_HOST else 'localhost'
 		user: if _envVars.MYSQLFAC_TEST_USER? then _envVars.MYSQLFAC_TEST_USER else 'root'
 		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'never'
@@ -16,6 +17,14 @@ module.exports  =
 		getTest: 
 			tbl: "Users"
 			id: "Dwrpf"
+
+		mgetTest: 
+			id: [ "Dwrpf", "RkCIA" ]
+
+		findTest: 
+			q: 
+				firstname: "Maxi"
+				role: "TRAINER"
 
 	tables: 
 		"Users":
@@ -32,11 +41,11 @@ module.exports  =
 			sortfield: "firstname,lastname"
 			sortdirection: "asc"
 			fields:
-				"id": 			{ name: "id",			fieldsets: [ "ls", "det" ], search: false, type: "string" }
+				"id": 				{ name: "id",			fieldsets: [ "ls", "det", "test" ], search: false, type: "string" }
 				"thirdparty_id": 	{ name: "thirdparty_id",fieldsets: [ "det" ], search: false, type: "string" }
 				"password": 		{ name: "password",		fieldsets: [ "det" ], search: false, type: "string", validation: { bcrypt: { rounds: 8 } }  }
 				"isactive": 		{ name: "isactive",		fieldsets: [ "det" ], search: false, type: "boolean", validation: { fireEventOnChange: "userchanged" } }
-				"firstname": 		{ name: "firstname",	fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { isRequired: true, fireEventOnChange: "userchanged" } }
+				"firstname": 		{ name: "firstname",	fieldsets: [ "ls", "det", "test" ], search: true,  type: "string", validation: { isRequired: true, fireEventOnChange: "userchanged" } }
 				"lastname": 		{ name: "lastname",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { isRequired: true, fireEventOnChange: "userchanged" } }
 				"address": 			{ name: "address",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"city": 			{ name: "city",			fieldsets: [ "det" ], search: true,  type: "string" }

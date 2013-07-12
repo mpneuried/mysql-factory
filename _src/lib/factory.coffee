@@ -16,6 +16,8 @@ module.exports = class MySQLFactory extends require( "./basic" )
 	defaults: =>
 		# extend the parent defaults
 		@extend super,
+			# **showQueryTime** *Boolean* Log the query time as info log
+			showQueryTime: false
 			# **the mysql driver pooling options**
 			# **host** *String* MySQL server host
 			host: 'localhost'
@@ -73,9 +75,9 @@ module.exports = class MySQLFactory extends require( "./basic" )
 	# # Public methods
 
 	###
-	## sql
+	## exec
 	
-	`factory.sql( statement[, args], cb )`
+	`factory.exec( statement[, args], cb )`
 	
 	Run a sql query by using a connection from the pool
 	
@@ -85,10 +87,11 @@ module.exports = class MySQLFactory extends require( "./basic" )
 	
 	@api public
 	###
-	sql: =>
+	exec: =>
+		_now = Date.now() if @config.showQueryTime
 		[ args..., cb ] = arguments
 
-		@log "info" , "run query", args
+		@debug "run query", args
 
 		# if statements is an Array concat them to a multi statement
 		if _.isArray( args[ 0 ] )
@@ -103,6 +106,7 @@ module.exports = class MySQLFactory extends require( "./basic" )
 			# define the return method to release the connection
 			args.push =>
 				conn.end()
+				@info "query time #{ ( Date.now() - _now ) }ms" if @config.showQueryTime
 				cb.apply( @, arguments )
 				return
 			# run the query with `node-mysql`
@@ -199,7 +203,7 @@ module.exports = class MySQLFactory extends require( "./basic" )
 			_opt = 
 				factory: @
 				logging: @config.logging
-
+			
 			_tblObj = new Table( _.omit( table, "events" ), _opt )
 
 			# add all defined event function to the model 

@@ -29,10 +29,13 @@ module.exports = (grunt) ->
 			options:
 				require: [ "should" ]
 				reporter: "spec"
-				bail: true
-				timeout: 10000
+				bail: false
+				timeout: 3000
+				slow: 1
 
-			all: [ "test/general.js" ]
+			main: [ "test/general.js" ]
+			old: [ "test/old.js" ]
+			all: [ "test/general.js" , "test/old.js" ]
 
 		includereplace:
 			pckg:
@@ -78,7 +81,7 @@ module.exports = (grunt) ->
 	grunt.registerTask "watch", "regarde"
 	grunt.registerTask "docs", "docker"
 	grunt.registerTask "default", "build"
-	grunt.registerTask "test", [ "mochacli" ]
+	grunt.registerTask "test", [ "mochacli:main" ]
 
 	# build the project
 	grunt.registerTask "build",[ "coffee", "includereplace", "test" ]

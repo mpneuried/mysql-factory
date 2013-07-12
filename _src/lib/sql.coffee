@@ -16,7 +16,7 @@ module.exports = ( options )->
 		defaults: =>
 			@extend super,
 				# **fields** *String* MySQL default fields
-				fields: "*"
+				fields: ["*"]
 				# **limit** *Number* MySQL default limit
 				limit: 1000
 				# **standardFilterCombine** *String* Standard where expression
@@ -38,6 +38,8 @@ module.exports = ( options )->
 			@_c.attrKeys or= []
 			@_c.attrNames or= []
 			@_c.attrsArrayKeys or= []
+			@_c.fieldsets or= {}
+			@_c.fieldlist or= []
 
 			super( options )
 			return
@@ -63,6 +65,8 @@ module.exports = ( options )->
 			@getter( "attrArrayKeys", @getArrayAttrKeys )
 
 			@define( "fields", @getFields, @setFields )
+
+			@define( "usefieldsets", @getUseFieldsets, @setUseFieldsets )
 
 			@define( "limit", @getLimit, @setLimit )
 
@@ -92,7 +96,7 @@ module.exports = ( options )->
 		@api public
 		###
 		clone: =>
-			@log "debug", "run clone", Object.keys( @_c )
+			@log "debug", "run clone"
 			return new SQLBuilder( _.clone( @_c ) )
 
 		###
@@ -235,6 +239,9 @@ module.exports = ( options )->
 				else if _.isString( pred ) or _.isNumber( pred )
 					# simple `=` filter
 					_filter += "= #{ mysql.escape( pred ) }"
+				else if _.isArray( pred )
+					# simple `=` filter
+					_filter += "in ( #{ mysql.escape( pred ) })"
 				else
 					# complex predicate filter
 					_operand = Object.keys( pred )[ 0 ]
@@ -265,7 +272,7 @@ module.exports = ( options )->
 							# `column in ( ?[0], ?[1], ... ?[n] )`
 							if not _.isArray( _val )
 								_val = [ _val ]
-							_filter += "in ( '#{ mysql.escape( _val ) }')"
+							_filter += "in ( #{ mysql.escape( _val ) })"
 				
 				# combine the filters with a `AND` or an `OR`
 				if @_c.filters?.length
@@ -450,6 +457,11 @@ module.exports = ( options )->
 					# collect the set type keys
 					if attr.type in [ "A", "array" ]
 						@_c.attrsArrayKeys.push key
+					@_c.fieldlist.push( key )
+					if @usefieldsets and attr.fieldsets?
+						for fldst in attr.fieldsets
+							@_c.fieldsets[ fldst ] = [] unless @_c.fieldsets[ fldst ]?
+							@_c.fieldsets[ fldst ].push( key )
 			return
 
 		###
@@ -613,10 +625,18 @@ module.exports = ( options )->
 		@api private
 		###
 		setFields: ( _fields = @config.fields )=>
-			if _.isArray( _fields )
-				@_c.fields = _fields.join( ", " )
-			else
+			if _.isFunction( _fields )
+				@_c.fields = _.pluck( _.filter(@attrs, _fields ), "name" )
+			else if _fields in  [ "all", "*" ]
+				@_c.fields = @_c.fieldlist
+			else if _fields in [ "idOnly", "idonly" ]
+				@_c.fields = [@idField]
+			else if @usefieldsets and _fields[..3] is "set:" and @_c.fieldsets[ _fields[4..] ]?
+				@_c.fields =  @_c.fieldsets[ _fields[4..] ]
+			else if _.isArray( _fields )
 				@_c.fields = _fields
+			else
+				@_c.fields = _fields.split( "," )
 			return
 
 		###
@@ -631,10 +651,42 @@ module.exports = ( options )->
 		@api private
 		###
 		getFields: =>
-			if @_c.fields?
-				@_c.fields
+			if @_c.fields?.length
+				@_c.fields.join( ", " )
 			else
-				@config.fields
+				"*"
+
+		###
+		## setUseFieldsets
+		
+		`sql.setUseFieldsets( tbl )`
+		
+		Use the Fieldset feature
+		
+		@param { String } tbl UseFieldsets name 
+		
+		@api private
+		###
+		setUseFieldsets: ( use )=>
+			@_c.usefieldsets = use or false
+			return
+
+		###
+		## getUseFieldsets
+		
+		`sql.getUseFieldsets()`
+		
+		Get the table
+		
+		@return { String } UseFieldsets name 
+		
+		@api private
+		###
+		getUseFieldsets: =>
+			if @_c.usefieldsets?
+				@_c.usefieldsets
+			else
+				false
 
 		###
 		## setLimit

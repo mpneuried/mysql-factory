@@ -16,6 +16,8 @@ _ = require('lodash')._
 _.string = require("underscore.string")
 EventEmitter = require( "events" ).EventEmitter
 
+utils = require( "../lib/utils" )
+
 bcrypt = require( "bcrypt" )
 
 redisHashPrefix = "modeldata:"

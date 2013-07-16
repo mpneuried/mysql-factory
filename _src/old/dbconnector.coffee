@@ -23,6 +23,7 @@
 sys = require( "sys" )
 EventEmitter = require( "events" ).EventEmitter
 _ = require('lodash')._
+utils = require( "../lib/utils" )
 
 # ## Superclass to handle mysql connections
 class DBConnector extends EventEmitter

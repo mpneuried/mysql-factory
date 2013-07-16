@@ -1,4 +1,4 @@
-utils = require( "../index" ).utils
+utils = require( "../lib/utils" )
 _envVars = process.env
 
 module.exports  =
@@ -9,7 +9,7 @@ module.exports  =
 		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'never'
 		database: if _envVars.MYSQLFAC_TEST_DB? then _envVars.MYSQLFAC_TEST_DB else "milonst_second"
 		logging: 
-			severity: "debug"
+			severity: "info"
 
 	test:
 		singleCreateTableTest: "Users"
@@ -26,6 +26,26 @@ module.exports  =
 				firstname: "Maxi"
 				role: "TRAINER"
 
+		insertTest:
+			firstname: "Test"
+			lastname: "Test"
+			gender: true
+			role: "USER"
+			_t: 0
+		
+		tokenTable: "Tokens"
+		insertTestToken:
+			user_id: "Dwrpf"
+			studio_id: 1
+			token: "desfire-#{utils.randomString( 15 )}"
+			_t: 0
+
+		updateTest: [
+			lastname: "Update1"
+		,
+			lastname: "Update2"
+			password: "test"
+		]
 	tables: 
 		"Users":
 			# database tablename
@@ -51,7 +71,7 @@ module.exports  =
 				"city": 			{ name: "city",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"zip": 				{ name: "zip",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"lastlogin": 		{ name: "lastlogin",	fieldsets: [ "det" ], search: false, type: "timestamp" }
-				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { isRequired: true, allreadyExistend: true } }
+				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { allreadyExistend: true } }
 				"phone": 			{ name: "phone",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"mobile": 			{ name: "mobile",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"birthday": 		{ name: "birthday",		fieldsets: [ "det" ], search: false, type: "date", validation: { fireEventOnChange: "userchanged" } }
@@ -76,19 +96,19 @@ module.exports  =
 
 			events:
 				"currplan.planchanged": ( field, oldValue, newValue )->
-					@log "debug", "USERS-EVENT: currplan.planchanged", field, oldValue, newValue 
+					#console.log "EVENT", "USERS-EVENT: currplan.planchanged", field, oldValue, newValue 
 					return
 				
 				"firstname.userchanged,lastname.userchanged,birthday.userchanged,trainer_id.userchanged,image.userchanged,isactive.userchanged,colors.userchanged": ( evnt, oldValue, newValue, id )=>
-					@log "debug", "USERS-EVENT: planchanged", evnt, oldValue, newValue, id 
+					console.log "EVENT", "USERS-EVENT: userchanged", evnt, oldValue, newValue, id 
 					return
 
 
 				"mdel,del,set,increment": ( eventname, err, res )->
-					@log "debug", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
+					console.log "EVENT", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
 					return
 				"mdel,del": ( eventname, err, res )->
-					@log "debug", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
+					#console.log "EVENT", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
 					return
 		
 		"Studios":
@@ -119,15 +139,15 @@ module.exports  =
 
 			events:
 				"set": ( eventname, err, res )->
-					@log "debug", "STUDIOS-EVENT: set",  eventname, err, res
+					#console.log "EVENT", "STUDIOS-EVENT: set",  eventname, err, res
 					return
 
 				"mdel,del": ( eventname, err, res )->
-					@log "debug", "STUDIOS-EVENT: mdel,del",  eventname, err, res
+					#console.log "EVENT", "STUDIOS-EVENT: mdel,del",  eventname, err, res
 					return
 
 				"mdel,del,set": ( eventname, err, res )->
-					@log "debug", "STUDIOS-EVENT: mdel,del,set",  eventname, err, res
+					#console.log "EVENT", "STUDIOS-EVENT: mdel,del,set",  eventname, err, res
 					return
 
 
@@ -154,12 +174,12 @@ module.exports  =
 			# solution to inject logic on events.
 			events: 
 				"mdel,del": ( eventname, err, res )->
-					@log "debug", "CONTRACTS-EVENT: mdel,del",  eventname, err, res
+					#console.log "EVENT", "CONTRACTS-EVENT: mdel,del",  eventname, err, res
 					return
 							
 
 				"set": ( eventname, err, res )->
-					@log "debug", "CONTRACTS-EVENT: set",  eventname, err, res
+					#console.log "EVENT", "CONTRACTS-EVENT: set",  eventname, err, res
 					return
 		
 		"Tokens": 
@@ -176,7 +196,7 @@ module.exports  =
 
 			events: 
 				"mdel,del,set": ( eventname, err, res )->
-					@log "debug", "TOKENS-EVENT: mdel,del,set",  eventname, err, res
+					#console.log "EVENT", "TOKENS-EVENT: mdel,del,set",  eventname, err, res
 					return
 
 

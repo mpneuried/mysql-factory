@@ -247,6 +247,10 @@ module.exports = ( options )->
 					_operand = Object.keys( pred )[ 0 ]
 					_val = pred[ _operand ]
 					switch _operand
+						when "fn"
+							# `use a sql function`
+							if _val?
+								_filter += if _val? then "= #{  _val }"
 						when "=="
 							# `column is NULL`
 							_filter += if _val? then "= #{ mysql.escape( _val ) }" else "is NULL"
@@ -367,6 +371,54 @@ module.exports = ( options )->
 			# remove the first and last delimiter and slipt the set into an array
 			value[ _lDlm..-( _lDlm + 1 ) ].split( @config.sqlSetDelimiter )
 
+		convertToType: ( key, value )=>
+			if _.isObject( key )
+				_ret = {}
+				for _key, _val of key when _key in @attrKeys
+					_ret[ _key ] = @convertToType( _key, _val )
+				return _ret
+			else
+				if not value?
+					return null
+
+				_cnf = @_getAttrConfig( key )
+				if _cnf
+					switch _cnf.type
+						when "string", "S"		
+							return value.toString()
+						when "number", "N"
+							if "." in value
+								return parseFloat( value )
+							else
+								return parseInt( value, 10 )
+
+						when "boolean", "B"
+							switch value.toString().toLowerCase()
+								when "true","1", "y","yes" then return true
+								else return false
+
+						when "json", "object", "J", "O"
+							if not value? or _.isEmpty( value )
+								return {}
+							try
+								return JSON.parse( value )
+							catch
+								@error "JSON parse error", value
+								return {}
+
+						when "timestamp", "T"
+							return parseInt( value, 10 )
+
+						when "date", "D"
+							if _.isDate( value )
+								return value
+							else
+								return moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm" ] )
+
+						when "array", "A"
+							return setToArray( value )
+
+
 	# # Getter and Setter methods
 		
 		###
@@ -453,7 +505,9 @@ module.exports = ( options )->
 					# collect the attribute keys
 					@_c.attrNames.push attr.name
 					# set the attribute configuration and extend it with the defauts
-					@_c.attrs.push @extend( {}, _defAttrCnf, attr )
+					_attr = @extend( {}, _defAttrCnf, attr )
+					@_c.attrs.push _attr
+
 					# collect the set type keys
 					if attr.type in [ "A", "array" ]
 						@_c.attrsArrayKeys.push key
@@ -765,9 +819,10 @@ module.exports = ( options )->
 		
 		@api private
 		###
-		_getAttrConfig: ( key )=>
+		_getAttrConfig: ( name )=>
 			for attr in @attrs
-				return attr if attr.key is key
+				return attr if attr.name is name
+			return null
 
 		###
 		## _getSaveVariables
@@ -792,18 +847,31 @@ module.exports = ( options )->
 					switch _cnf.type
 						when "string", "number", "S", "N"
 							# create regular values
-							_vals.push( mysql.escape( _val ) )
+							if _cnf.type in [ "string", "S" ] and _val?[ ..2 ] is "IF("
+								_vals.push( _val )
+							else if _val is "now"
+								_vals.push( "UNIX_TIMESTAMP()*1000" )
+							else if _val is "incr" and _cnf.type in [ "number", "N" ]
+								_vals.push( "IF( #{ _key } is NULL, 0, #{ _key } + 1 )" )
+							else if _val is "decr" and _cnf.type in [ "number", "N" ]
+								_vals.push( "IF( #{ _key } is NULL, 0, #{ _key } - 1 )" )
+							else
+								_vals.push( mysql.escape( _val ) )
 							_keys.push( _key )
 
 						when "boolean", "B"
-							try 
-								_vals.push( mysql.escape( JSON.stringify( _val ) ) )
-								_keys.push( _key )
+							switch _val.toString().toLowerCase()
+								when "true","1", "y","yes" then _vals.push( true )
+								else _vals.push( false )
+							_keys.push( _key )
 
 						when "json", "object", "J", "O"
-							try 
-								_vals.push( mysql.escape( JSON.stringify( _val ) ) )
-								_keys.push( _key )
+							if not val?
+								_vals.push( "{}" )
+							else
+								try 
+									_vals.push( mysql.escape( JSON.stringify( _val ) ) )
+							_keys.push( _key )
 
 						when "timestamp", "T"
 							if _val is "now"
@@ -814,10 +882,13 @@ module.exports = ( options )->
 
 
 						when "date", "D"
-							if _.isDate( value )
-								_vals.push( mysql.escape( value.toISOString() ) )
+							if _val is "now"
+								_val = Date.now()
+
+							if _.isDate( _val )
+								_vals.push( mysql.escape( _val.toISOString() ) )
 								_keys.push( _key )
-							else if _.isDate( ( _m = moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm" ] ) )._d )
+							else if _.isDate( ( _m = moment( _val, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm" ] ) )._d )
 								_vals.push( mysql.escape( _m.format( "YYYY-MM-DD HH:mm" ) ) )
 								_keys.push( _key )
 

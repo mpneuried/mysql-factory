@@ -1,5 +1,5 @@
 (function() {
-  var Datamodel, INITTREE, Modelfactory, async, moment, _, _arrayInclude, _arrayRemove;
+  var Datamodel, INITTREE, Modelfactory, async, moment, utils, _, _arrayInclude, _arrayRemove;
 
   Datamodel = require('./datamodel').Datamodel;
 
@@ -8,6 +8,8 @@
   moment = require('moment');
 
   _ = require('lodash')._;
+
+  utils = require("../lib/utils");
 
   _arrayInclude = function(arrBase, arrAdd) {
     var aEl, _i, _len;

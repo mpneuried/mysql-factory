@@ -14,6 +14,7 @@ Datamodel = require('./datamodel').Datamodel
 async = require( 'async' )
 moment = require( 'moment' )
 _ = require('lodash')._
+utils = require( "../lib/utils" )
 #Tpman = require( './treepackage' )
 
 #internal helper function to add the elements of an array to another array

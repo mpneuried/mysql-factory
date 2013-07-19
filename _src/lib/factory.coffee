@@ -203,6 +203,7 @@ module.exports = class MySQLFactory extends require( "./basic" )
 			_opt = 
 				factory: @
 				logging: @config.logging
+				returnFormat: @config.returnFormat
 			
 			_tblObj = new Table( _.omit( table, "events" ), _opt )
 

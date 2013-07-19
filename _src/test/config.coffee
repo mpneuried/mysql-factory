@@ -8,8 +8,33 @@ module.exports  =
 		user: if _envVars.MYSQLFAC_TEST_USER? then _envVars.MYSQLFAC_TEST_USER else 'root'
 		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'never'
 		database: if _envVars.MYSQLFAC_TEST_DB? then _envVars.MYSQLFAC_TEST_DB else "milonst_second"
+		timezone: "+0200"
 		logging: 
-			severity: "info"
+			severity: "warning"
+	###
+		returnFormat: ( err, result )=>
+			oReturn = {}
+			if err?
+				_data = {}
+				for _k, _v of err when _k not in [ "name", "message" ]
+					_data[ _k ] = _v
+
+				oReturn = 
+					success: false
+					errorcode: err.name
+					msg: err.message
+					data: _data
+
+			else
+				oReturn =
+					success: true
+					errorcode: null
+					msg: null
+					data: result
+
+			return oReturn
+	###
+		
 
 	test:
 		singleCreateTableTest: "Users"
@@ -26,13 +51,6 @@ module.exports  =
 				firstname: "Maxi"
 				role: "TRAINER"
 
-		insertTest:
-			firstname: "Test"
-			lastname: "Test"
-			gender: true
-			role: "USER"
-			_t: 0
-		
 		tokenTable: "Tokens"
 		insertTestToken:
 			user_id: "Dwrpf"
@@ -40,12 +58,6 @@ module.exports  =
 			token: "desfire-#{utils.randomString( 15 )}"
 			_t: 0
 
-		updateTest: [
-			lastname: "Update1"
-		,
-			lastname: "Update2"
-			password: "test"
-		]
 	tables: 
 		"Users":
 			# database tablename
@@ -71,7 +83,7 @@ module.exports  =
 				"city": 			{ name: "city",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"zip": 				{ name: "zip",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"lastlogin": 		{ name: "lastlogin",	fieldsets: [ "det" ], search: false, type: "timestamp" }
-				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { allreadyExistend: true } }
+				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { allreadyExistend: "email_unique" } }
 				"phone": 			{ name: "phone",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"mobile": 			{ name: "mobile",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"birthday": 		{ name: "birthday",		fieldsets: [ "det" ], search: false, type: "date", validation: { fireEventOnChange: "userchanged" } }
@@ -100,12 +112,12 @@ module.exports  =
 					return
 				
 				"firstname.userchanged,lastname.userchanged,birthday.userchanged,trainer_id.userchanged,image.userchanged,isactive.userchanged,colors.userchanged": ( evnt, oldValue, newValue, id )=>
-					console.log "EVENT", "USERS-EVENT: userchanged", evnt, oldValue, newValue, id 
+					#console.log "EVENT", "USERS-EVENT: userchanged", evnt, oldValue, newValue, id 
 					return
 
 
 				"mdel,del,set,increment": ( eventname, err, res )->
-					console.log "EVENT", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
+					#console.log "EVENT", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
 					return
 				"mdel,del": ( eventname, err, res )->
 					#console.log "EVENT", "USERS-EVENT: mdel,del,set,increment",  eventname, err, res
@@ -117,8 +129,8 @@ module.exports  =
 			fields:
 				"id": 				{ name: "id",			search: false, type: "number" }
 				"studioname": 		{ name: "studioname",	search: false, type: "string", validation: { isRequired: true } }
-				"customernumber": 	{ name: "customernumber",search: false, type: "string", validation: { isRequired: true, allreadyExistend: true } }
-				"short": 			{ name: "short",		search: false, type: "string", validation: { isRequired: true, allreadyExistend: true } }
+				"customernumber": 	{ name: "customernumber",search: false, type: "string", validation: { isRequired: true, allreadyExistend: "customernumber" } }
+				"short": 			{ name: "short",		search: false, type: "string", validation: { isRequired: true, allreadyExistend: "short" } }
 				"address": 			{ name: "address",		search: false, type: "string", validation: { isRequired: true } }
 				"city": 			{ name: "city",			search: false, type: "string", validation: { isRequired: true } }
 				"zip": 				{ name: "zip",			search: false, type: "string", validation: { isRequired: true } }
@@ -189,7 +201,7 @@ module.exports  =
 				"id": 				{ name: "id",			search: false, type: "number" }
 				"user_id": 			{ name: "user_id",		search: false, type: "string", validation: { isRequired: true } }
 				"studio_id": 		{ name: "studio_id",	search: false, type: "number", validation: { isRequired: true } }
-				"token": 			{ name: "token",		search: false, type: "string", validation: { isRequired: true, allreadyExistend: true } }
+				"token": 			{ name: "token",		search: false, type: "string", validation: { isRequired: true, allreadyExistend: "token" } }
 				"_t": 				{ name: "_t",			search: false, type: "number", validation: { isRequired: true, equalOldValue: true, setTimestamp: true } }
 				"_u": 				{ name: "_u",			search: false, type: "number", validation: { incrementOnSave: true } }
 

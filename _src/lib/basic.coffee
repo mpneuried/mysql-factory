@@ -124,7 +124,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	
 	@api private
 	###
-	_handleError: ( cb, err, data = {} )=>
+	_handleError: ( cb, err, data = {}, errExnd )=>
 		# try to create a error Object with humanized message
 		if _.isString( err )
 			_err = new Error()
@@ -137,6 +137,9 @@ module.exports = class Basic extends require('events').EventEmitter
 		else 
 			_err = err
 
+		for _k, _v of data 
+			_err[ _k ] = _v
+
 		if _.isFunction( cb )
 			#@log "error", "", _err
 			cb( _err )
@@ -144,7 +147,7 @@ module.exports = class Basic extends require('events').EventEmitter
 			@log "error", cb, _err
 		else
 			throw _err
-		return
+		return _err
 
 	###
 	## log

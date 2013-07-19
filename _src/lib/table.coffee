@@ -84,8 +84,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 	@api private
 	###
 	initialize: =>
-
-		SQLBuilder = ( require( "./sql" ) )( logging: @config.logging )
+		SQLBuilder = ( require( "./sql" ) )( logging: @config.logging, @escape )
 
 		@builder = new SQLBuilder()
 			
@@ -104,8 +103,13 @@ module.exports = class MySQLTable extends require( "./basic" )
 		@builder.forward = @sortdirection
 
 		return
+
+	escape: ( val )=>
+		return @factory.pool.escape( val )
 	
 	get: ( id, cb, opt = {} )=>
+
+		cb = @_wrapCallback( cb )
 
 		# get the standard options
 		options = @_getOptions( opt, "get" )
@@ -123,6 +127,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 	mget: ( ids, cb, opt = {} )=>
 
+		cb = @_wrapCallback( cb )
+
 		# get the standard options
 		options = @_getOptions( opt, "get" )
 
@@ -138,6 +144,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 		return
 
 	find: ( filter, cb, opt = {} )=>
+
+		cb = @_wrapCallback( cb )
 
 		if not filter? or not _.isObject( filter )
 			@_handleError( cb, "invalid-filter" )
@@ -161,17 +169,19 @@ module.exports = class MySQLTable extends require( "./basic" )
 			if options.offset?
 				sql.offset = options.offset
 
-		if options._customQueryFilter?
-			@_handleError( cb, "deprecated-option", key: "_customQueryFilter" )
-			return 
-
 		sql.filter( filter )
+
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
 
 		@factory.exec( sql.select(), @_handleList( "mget", filter, opt, cb ) )
 
 		return
 
 	set: ( id, data, cb, options )=>
+
+		cb = @_wrapCallback( cb )
+
 		aL = arguments.length
 		switch aL
 			when 4 then @update( id, data, cb, options )
@@ -190,6 +200,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 	update: ( id, data, cb, options = {} )=>
 
+		cb = @_wrapCallback( cb )
+
 		sql = @builder.clone()
 
 		_valData = 
@@ -207,25 +219,13 @@ module.exports = class MySQLTable extends require( "./basic" )
 			return
 		return
 
-	_update: ( args, cb )=>
-		{ id, data, sql, options } = args
-
-		@debug "update", id, data
-
-		sql.filter( sql.idField, id )
-		
-		_getStmt = @builder.clone().filter( sql.idField, id ).select( false ) 
-		stmts = [ _getStmt, sql.update( data ), _getStmt ]
-
-		@factory.exec( stmts, @_handleSave( "set", id, data, options, sql, cb ) )
-
-		return
-
 	insert: ( data, cb, options = {} )=>
 
-		sql = @builder.clone()
+		cb = @_wrapCallback( cb )
 
-		options.insertRetry = 0
+		sql = @builder.clone()
+		
+		options.insertRetry = if data[ @sIdField ]? then +Infinity else 0
 
 		_valData = 
 			isUpdate: false
@@ -241,22 +241,162 @@ module.exports = class MySQLTable extends require( "./basic" )
 			@_insert( _valData, cb )
 			return
 
+	has: ( id, cb, opt = {} )=>
+
+		cb = @_wrapCallback( cb )
+
+		# get the standard options
+		options = @_getOptions( opt, "has" )
+
+		sql = @builder.clone()
+
+		sql.filter( @sIdField, id )
+
+		@factory.exec( sql.count(), @_handleSingle( "has", id, opt, cb ) )
+
+		return
+
+	count: ( filter, cb, opt = {} )=>
+
+		cb = @_wrapCallback( cb )
+
+		# get the standard options
+		options = @_getOptions( opt, "count" )
+
+		sql = @builder.clone()
+
+		if options._customQueryFilter?
+			@_handleError( cb, "deprecated-option", key: "_customQueryFilter" )
+			return 
+
+		sql.filter( filter )
+
+		@factory.exec( sql.count(), @_handleSingle( "count", filter, opt, cb ) )
+
+		return
+
+	count: ( filter, cb, opt = {} )=>
+
+		cb = @_wrapCallback( cb )
+
+		# get the standard options
+		options = @_getOptions( opt, "count" )
+
+		sql = @builder.clone()
+
+		if options._customQueryFilter?
+			@_handleError( cb, "deprecated-option", key: "_customQueryFilter" )
+			return 
+
+		sql.filter( filter )
+
+		@factory.exec( sql.count(), @_handleSingle( "count", filter, opt, cb ) )
+
+		return
+
+	increment: ( id, field, cb, opt = {} )=>
+
+		@_crement( id, field, +1, cb, opt )
+		
+		return
+
+	decrement: ( id, field, cb, opt = {} )=>
+
+		@_crement( id, field, -1, cb, opt )
+		
+		return
+
+	del: ( id, cb, opt = {} )=>
+		
+		cb = @_wrapCallback( cb )
+
+		# get the standard options
+		options = @_getOptions( opt, "count" )
+
+		sql = @builder.clone()
+
+		sql.filter( @sIdField, id )
+		stmts = [ sql.select( false ), sql.del() ]
+
+		@factory.exec( stmts, @_handleSingle( "del", id, opt, cb ) )
+
+		return
+
+	mdel: ( ids, cb, opt = {} )=>
+		
+		cb = @_wrapCallback( cb )
+
+		# get the standard options
+		options = @_getOptions( opt, "count" )
+
+		sql = @builder.clone()
+
+		for id in ids
+			sql.filter( @sIdField, id ).or()
+
+		stmts = [ sql.select( false ), sql.del() ]
+
+		@factory.exec( stmts, @_handleSingle( "mdel", ids, opt, cb ) )
+
+		return
+
+	_crement: ( id, field, count, cb, opt = {} )=>
+
+		cb = @_wrapCallback( cb )
+		_type = if count > 0 then "increment" else "decrement"
+
+		# get the standard options
+		options = @_getOptions( opt, "count" )
+
+		sql = @builder.clone()
+
+		if not sql.hasField( field )
+			@_handleError( cb, "invalid-field", method: _type, field: field )
+			return
+
+		sql.filter( @sIdField, id )
+
+		sql.fields = "#{ field } AS count"
+
+		_data = {}
+		_data[ field ] = "crmt" + count
+
+		stmt = [ sql.update( _data ), sql.select( false ) ]
+
+		@factory.exec( stmt, @_handleSingle( _type, id, opt, cb ) )
+
+		return
+
+	_update: ( args, cb )=>
+		{ id, data, sql, options } = args
+
+		@debug "update", id, data
+
+		sql.filter( @sIdField, id )
+		
+		_getStmt = @builder.clone().filter( @sIdField, id ).select( false ) 
+		stmts = [ _getStmt, sql.update( data ), _getStmt ]
+
+		@factory.exec( stmts, @_handleSave( "set", id, data, options, sql, cb ) )
+
+		return
+
 	_insert: ( args, cb )=>
 		{ id, data, sql, options } = args
 
-		if data[ sql.idField ]?
-			_id = data[ sql.idField ]
+		if data[ @sIdField ]?
+			_id = data[ @sIdField ]
 		else
 			if @hasStringId
 				_id = @_generateNewID()
-				data[ sql.idField ] = _id
+				data[ @sIdField ] = _id
 			else
 				_id =  { "fn": "LAST_INSERT_ID()" }
 
 		@debug "insert", data
 		stmts = [ sql.insert( data ) ]
 
-		stmts.push @builder.clone().filter( sql.idField, _id ).select( false )
+		stmts.push @builder.clone().filter( @sIdField, _id ).select( false )
 
 		@factory.exec( stmts, @_handleSave( "set", null, data, options, sql, cb ) )
 
@@ -286,6 +426,9 @@ module.exports = class MySQLTable extends require( "./basic" )
 			options._afterSave or= {}
 			options._afterSave[ field.name ] or= {}
 
+			options._changedValues or= {}
+			options._changedValues[ field.name ] or= null
+
 			_validation = field.validation or {}
 
 			if not isUpdate and _validation.isRequired is true and not value?
@@ -299,10 +442,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 			if _validation.setTimestamp is true and field.type in [ "string", "number", "S", "N", "timestamp", "T", "date", "D" ]
 				# special command to run `UNIX_TIMESTAMP()*1000`
+				options._changedValues[ field.name ] = data[ field.name ]
 				data[ field.name ] = "now"
 
 			if _validation.incrementOnSave is true and field.type in [ "number", "N" ]
 				# special command to run `field = field + 1`
+				options._changedValues[ field.name ] = data[ field.name ]
 				if isUpdate
 					data[ field.name ] = "incr"
 				else
@@ -312,9 +457,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 				if value is _validation.notAllowedForValue
 					# it is not allowed to write this value
-					@_handleError( cb, "value-not-allowed", field: field.name, value: validation.notAllowedForValue )
+					@_handleError( cb, "value-not-allowed", field: field.name, value: _validation.notAllowedForValue )
 					return
 				else
+					options._changedValues[ field.name ] = data[ field.name ]
 					# if the not allowed value is saved in db it's not possible to overwite it.
 					data[ field.name ] = "IF( #{field.name} != \"#{ _validation.notAllowedForValue }\", \"#{ value }\", #{field.name} )"
 
@@ -329,8 +475,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 			if _validation.fireEventOnChange? 
 				options._afterSave[ field.name ].fireEventOnChange = _validation.fireEventOnChange
 
-			if _validation.allreadyExistend is true
-				options._afterSave[ field.name ].allreadyExistend = true
+			if _validation.allreadyExistend?
+				options._afterSave[ field.name ].allreadyExistend = _validation.allreadyExistend
 
 			cb( null )
 			return
@@ -351,20 +497,52 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 
 	_handleSingle: ( type, args..., cb )=>
+
 		return ( err, results, meta )=>
 			if err?
 				cb( err )
 				return
 
 			if _.isArray( results )
-				results = _.first( results )
+				if type in [ "increment", "decrement", "del" ]
+					if type is "del"
+						[ _get, _save ] = results
+					else
+						[ _save, _get ] = results
+					if not _save?.affectedRows
+						@_handleError( cb, "not-found" )
+						return
 
-			if not results?
-				@_handleError( cb, "not-found" )
-				return
+					results = _.last( _get )
 
-			#@emit type, id, results
-			cb( null, results )
+				else if type in [ "mdel" ]
+					[ _get, _save ] = results
+					if not _save?.affectedRows
+						@_handleError( cb, "not-found" )
+						return
+					results = _get
+				else
+					results = _.first( results )
+
+			switch type
+				when "has"
+					if results?.count >= 1
+						cb( null, true )
+					else
+						cb( null, false )
+				when "count", "increment", "decrement"
+					if results?.count >= 1
+						cb( null, parseInt( results?.count, 10 ) )
+					else
+						cb( null, 0 )
+				else
+
+					if not results?
+						@_handleError( cb, "not-found" )
+						return
+
+					#@emit type, id, results
+					cb( null, @builder.convertToType( results ) )
 			return
 
 	_handleList: ( type, args..., cb )=>
@@ -374,16 +552,18 @@ module.exports = class MySQLTable extends require( "./basic" )
 				return
 
 			#@emit type, id, results
-			cb( null, results )
+			cb( null, @builder.convertToType( results ) )
 			return
 
 	_handleSave: ( type, id, data, options, sql, cb )=>
 		return ( err, results )=>
 			# check for a duplicate entry on a string id insert and retry
-			if @hasStringId and not id? and err?.code is "ER_DUP_ENTRY" and err.message.indexOf( "PRIMARY" ) and not data[ sql.idField ]? and options?.insertRetry < @config.stringIdInsertRetrys
-				@warning "detected double sting id insert, so retry", data[ sql.idField ]
+			if @hasStringId and not id? and err?.code is "ER_DUP_ENTRY" and err.message.indexOf( "PRIMARY" ) >= 0 and options?.insertRetry < @config.stringIdInsertRetrys
+				@warning "detected double sting id insert, so retry", data[ @sIdField ]
 
 				options.insertRetry++
+
+				data[ @sIdField ] = @_generateNewID()
 
 				_valData = 
 					id: null
@@ -391,6 +571,14 @@ module.exports = class MySQLTable extends require( "./basic" )
 					sql: sql
 					options: options
 				@_insert( _valData, cb )
+				return
+
+			else if err?.code is "ER_DUP_ENTRY"
+				for _field, _val of options._afterSave when not _.isEmpty( _val )
+					if err.message.indexOf( _val.allreadyExistend ) >= 0
+						@_handleError( cb, "validation-already-existend", { field: _field, value: options?._changedValues?[ _field ] or data[ _field ] } )
+						return
+				cb( err )
 				return
 
 			else if err?
@@ -420,17 +608,49 @@ module.exports = class MySQLTable extends require( "./basic" )
 		if _old? and _.isArray( _old )
 			_old = _.first( _old )
 
+		_new = @builder.convertToType( _new )
+
+		_old = @builder.convertToType( _old ) if _old?
+
 		# check id on insert
 		if not id? and not @hasStringId and _saveMeta.insertId isnt _new.id
 			@_handleError( cb, "wrong-insert-return" )
 
 		for _field, _val of options._afterSave when not _.isEmpty( _val )
-			if id? and _val.fireEventOnChange? and _old[ _field ] isnt _new[ _field ]
-				@emit "#{ _field }.#{ _val.fireEventOnChange }", _field, _old[ _field ], _new[ _field ]
+			if id? and _val.checkEqualOld? and _saveMeta.affectedRows is 0
+				@_handleError( cb, "validation-notequal", { field: _field, curr: _old[ _field ], value: options?._changedValues?[ _field ] or data[ _field ] } )
+				return
 
-		cb( null, @builder.convertToType( _new ) )
+			if id? and _val.fireEventOnChange? and _old[ _field ] isnt _new[ _field ]
+				@emit "#{ _field }.#{ _val.fireEventOnChange }", _field, _old[ _field ], _new[ _field ], id
+
+		if _saveMeta.affectedRows is 0
+			@_handleError( cb, "not-found" )
+			return
+
+		@emit( "set", null, _new )
+
+		cb( null, _new )
 
 		return
+
+	_wrapCallback: ( cb )=>
+		if @config.returnFormat?
+			return ( err, ret )=>
+				if err?
+					cb( @config.returnFormat( err ) )
+					return
+
+				if _.isArray( ret )
+					_ret = for item in ret
+						@config.returnFormat( null, item )
+					cb( err, _ret )
+				else
+					cb( err, @config.returnFormat( null, ret ) )
+				return
+		else
+			return cb
+
 	# # Error message mapping
 	ERRORS: =>
 		@extend super, 
@@ -441,3 +661,6 @@ module.exports = class MySQLTable extends require( "./basic" )
 			"validation-required": "The field `<%= field %>` is required."
 			"value-not-allowed": "It's not allowed to write the value `<%= value %>`to the field `<%= field %>`"
 			"wrong-insert-return": "The select after the insert query returns the wrong row."
+			"validation-notequal": "`equalOldValue` validation error. The value of `<%= field %>` do not match the current save value. You tried to save `<%= value %>` but `<%= curr %>` is necessary"
+			"validation-already-existend": "The value `<%= value %>` for field `<%= field %>` already exists."
+			"invalid-field": "The field `<%= field %>` is not defined for the method `<%= method %>`"

@@ -1,13 +1,14 @@
 # import the external modules
 mysql = require 'mysql'
 utils = require './utils'
+moment = require('moment')
 _ = require('lodash')._
 
 # # SQLBuilder
 # ### extends [Basic](basic.coffee.html)
 
 # return a method to prdefine the options fro all Instances
-module.exports = ( options )->
+module.exports = ( options, escape = mysql.escape )->
 	
 	# Helper to generate the sql statements
 	return class SQLBuilder extends require( "./basic" )
@@ -185,6 +186,27 @@ module.exports = ( options )->
 
 			return _.compact( statement ).join( "\n" )
 
+		###
+		## count
+		
+		`sql.count( [complex] )`
+		
+		Create a count statement
+		
+		@return { String } count statement 
+		
+		@api public
+		###
+		count: =>
+
+			statement = []
+			statement.push "SELECT COUNT( #{ @idField } ) as count" 
+			statement.push "FROM #{ @table }"
+
+			statement.push @where
+
+			return _.compact( statement ).join( "\n" )
+
 
 		###
 		## delete
@@ -238,10 +260,10 @@ module.exports = ( options )->
 					_filter += "is NULL"
 				else if _.isString( pred ) or _.isNumber( pred )
 					# simple `=` filter
-					_filter += "= #{ mysql.escape( pred ) }"
+					_filter += "= #{ escape( pred ) }"
 				else if _.isArray( pred )
 					# simple `=` filter
-					_filter += "in ( #{ mysql.escape( pred ) })"
+					_filter += "in ( #{ escape( pred ) })"
 				else
 					# complex predicate filter
 					_operand = Object.keys( pred )[ 0 ]
@@ -253,30 +275,38 @@ module.exports = ( options )->
 								_filter += if _val? then "= #{  _val }"
 						when "=="
 							# `column is NULL`
-							_filter += if _val? then "= #{ mysql.escape( _val ) }" else "is NULL"
+							_filter += if _val? then "= #{ escape( _val ) }" else "is NULL"
 						when "!="
 							# `column is not NULL`
-							_filter += if _val? then "!= #{ mysql.escape( _val ) }" else "is not NULL"
+							_filter += if _val? then "!= #{ escape( _val ) }" else "is not NULL"
 						when ">", "<", "<=", ">="
 							# `column > ?`, `column < ?`, `column >= ?` or `column <= ?` or for an array `column between ?[0] and ?[1]`
 							if _.isArray( _val )
-								_filter += "between #{ mysql.escape( _val[ 0 ] ) } and #{ mysql.escape( _val[ 1 ] ) }"
+								_filter += "between #{ escape( _val[ 0 ] ) } and #{ escape( _val[ 1 ] ) }"
 							else
-								_filter += "#{ _operand } #{ mysql.escape( _val ) }"
+								_filter += "#{ _operand } #{ escape( _val ) }"
 						when "contains"
 							# `column like "%?%"`
-							_filter += "like '#{ mysql.escape( "%" + _val + "%" ) }'"
+							_filter += "like #{ escape( "%" + _val + "%" ) }"
 						when "!contains"
 							# `column not like "%?%"`
-							_filter += "not like '#{ mysql.escape( "%" + _val + "%" ) }'"
+							_filter += "not like #{ escape( "%" + _val + "%" ) }"
 						when "startsWith"
 							# `column like "?%"`
-							_filter += "like '#{ mysql.escape( _val + "%" ) }'"
+							_filter += "like #{ escape( _val + "%" ) }"
 						when "in"
 							# `column in ( ?[0], ?[1], ... ?[n] )`
 							if not _.isArray( _val )
 								_val = [ _val ]
-							_filter += "in ( #{ mysql.escape( _val ) })"
+							_filter += "in ( #{ escape( _val ) })"
+
+						when "sub"
+							# `column in ( ?[0], ?[1], ... ?[n] )`
+							subtable = new SQLBuilder()
+							subtable.table = _val.table 
+							subtable.fields = _val.field
+							subtable.filter( _val.filter )
+							_filter += "in ( #{ subtable.select( false ) })"
 				
 				# combine the filters with a `AND` or an `OR`
 				if @_c.filters?.length
@@ -372,7 +402,12 @@ module.exports = ( options )->
 			value[ _lDlm..-( _lDlm + 1 ) ].split( @config.sqlSetDelimiter )
 
 		convertToType: ( key, value )=>
-			if _.isObject( key )
+			if _.isArray( key )
+				_ret = []
+				for _item in key
+					_ret.push @convertToType( _item )
+				return _ret
+			else if _.isObject( key )
 				_ret = {}
 				for _key, _val of key when _key in @attrKeys
 					_ret[ _key ] = @convertToType( _key, _val )
@@ -413,10 +448,13 @@ module.exports = ( options )->
 							if _.isDate( value )
 								return value
 							else
-								return moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm" ] )
+								return moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] )
 
 						when "array", "A"
 							return setToArray( value )
+
+		hasField: ( field )=>
+			return field in @attrKeys
 
 
 	# # Getter and Setter methods
@@ -845,18 +883,35 @@ module.exports = ( options )->
 				_cnf = @_getAttrConfig( _key )
 				if _cnf
 					switch _cnf.type
-						when "string", "number", "S", "N"
+						when "string", "S"
 							# create regular values
-							if _cnf.type in [ "string", "S" ] and _val?[ ..2 ] is "IF("
+							if _val?[ ..2 ] is "IF("
+								_vals.push( _val )
+							else
+								_vals.push( escape( _val ) )
+							_keys.push( _key )
+
+						when "number", "N"
+							# create regular values
+							if _.isString( _val ) and _val?[ ..2 ] is "IF("
 								_vals.push( _val )
 							else if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()*1000" )
-							else if _val is "incr" and _cnf.type in [ "number", "N" ]
+							else if _val is "incr"
 								_vals.push( "IF( #{ _key } is NULL, 0, #{ _key } + 1 )" )
-							else if _val is "decr" and _cnf.type in [ "number", "N" ]
+							else if _val is "decr"
 								_vals.push( "IF( #{ _key } is NULL, 0, #{ _key } - 1 )" )
+							else if _.isString( _val ) and _val?[ ..3 ] is "crmt"
+								_count = parseInt( _val[4..], 10 )
+								_operand = "+"
+								if isNaN( _count )
+									_count = 1
+								if _count < 0
+									_operand = "-"
+									_count = _count * -1
+								_vals.push( "IF( #{ _key } is NULL, #{ if _operand is "+" then 1 else 0 }, #{ _key } #{ _operand } #{ _count } )" )
 							else
-								_vals.push( mysql.escape( _val ) )
+								_vals.push( escape( _val ) )
 							_keys.push( _key )
 
 						when "boolean", "B"
@@ -866,30 +921,30 @@ module.exports = ( options )->
 							_keys.push( _key )
 
 						when "json", "object", "J", "O"
-							if not val?
+							if not _val?
 								_vals.push( "{}" )
 							else
 								try 
-									_vals.push( mysql.escape( JSON.stringify( _val ) ) )
+									_vals.push( escape( JSON.stringify( _val ) ) )
 							_keys.push( _key )
 
 						when "timestamp", "T"
 							if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()*1000" )
 							else
-								_vals.push( mysql.escape( _val ) )
+								_vals.push( escape( _val ) )
 							_keys.push( _key )
 
 
 						when "date", "D"
 							if _val is "now"
-								_val = Date.now()
+								_val = new Date()
 
 							if _.isDate( _val )
-								_vals.push( mysql.escape( _val.toISOString() ) )
+								_vals.push( escape( _val ) )
 								_keys.push( _key )
-							else if _.isDate( ( _m = moment( _val, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm" ] ) )._d )
-								_vals.push( mysql.escape( _m.format( "YYYY-MM-DD HH:mm" ) ) )
+							else if _.isDate( ( _m = moment( _val, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] ) )._d )
+								_vals.push( escape( _m.format( "YYYY-MM-DD HH:mm" ) ) )
 								_keys.push( _key )
 
 						when "array", "A"
@@ -929,26 +984,26 @@ module.exports = ( options )->
 			
 			# set empty
 			if not inp?
-				mysql.escape( dlm )
+				escape( dlm )
 			
 			# set by array
 			else if _.isArray( inp )
 				if not inp.length 
 					# set empty by empty array
-					mysql.escape( dlm )
+					escape( dlm )
 				else
 					# reset by array
-					mysql.escape( dlm + inp.join( dlm ) + dlm )
+					escape( dlm + inp.join( dlm ) + dlm )
 
 			# set by object
 			else if _.isObject( inp )
 				if inp[ "$reset" ]
 					if _.isArray( inp[ "$reset" ] )
 						# reset by $reset with an array
-						mysql.escape( dlm + inp[ "$reset" ].join( dlm ) + dlm )
+						escape( dlm + inp[ "$reset" ].join( dlm ) + dlm )
 					else
 						# reset by $reset with a single value
-						mysql.escape( dlm + inp[ "$reset" ] + dlm )
+						escape( dlm + inp[ "$reset" ] + dlm )
 				else
 					# run $add or $rem command
 					
@@ -998,12 +1053,11 @@ module.exports = ( options )->
 						null
 			# set by string or number
 			else if inp?
-				 mysql.escape( dlm + inp + dlm )
+				 escape( dlm + inp + dlm )
 
 			# noting to set
 			else
 				null
-
 
 		# # Error message mapping
 		ERRORS: =>

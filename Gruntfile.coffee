@@ -34,8 +34,8 @@ module.exports = (grunt) ->
 				slow: 1
 
 			main: [ "test/general.js" ]
-			old: [ "test/old.js" ]
-			all: [ "test/general.js" , "test/old.js" ]
+			#old: [ "test/old.js" ]
+			#all: [ "test/general.js" , "test/old.js" ]
 
 		includereplace:
 			pckg:

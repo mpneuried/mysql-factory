@@ -180,6 +180,8 @@ module.exports = class MySQLFactory extends require( "./basic" )
 	has: ( tableName )=>
 		@_tables[ tableName ]?
 
+	escape: ( val )=>
+		return @pool.escape( val )
 
 	###
 	## _initTables

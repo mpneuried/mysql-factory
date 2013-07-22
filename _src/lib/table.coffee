@@ -350,6 +350,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		return
 
+	getFieldNames: ( fields )=>
+		_sql = @builder.clone()
+		_sql.fields = fields if fields?
+		_sql.fieldNames
+
 	_crement: ( id, field, count, cb, opt = {} )=>
 
 		cb = @_wrapCallback( cb )
@@ -627,11 +632,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		for _field, _val of options._afterSave when not _.isEmpty( _val )
 			if id? and _val.checkEqualOld? and _saveMeta.affectedRows is 0
-				@_handleError( cb, "validation-notequal", { field: _field, curr: _old[ _field ], value: options?._changedValues?[ _field ] or data[ _field ] } )
+				@_handleError( cb, "validation-notequal", { field: _field, curr: _old?[ _field ], value: options?._changedValues?[ _field ] or data[ _field ] } )
 				return
 
-			if id? and _val.fireEventOnChange? and _old[ _field ] isnt _new[ _field ]
-				@emit "#{ _field }.#{ _val.fireEventOnChange }", _field, _old[ _field ], _new[ _field ], id
+			if id? and _val.fireEventOnChange? and _old?[ _field ] isnt _new?[ _field ]
+				@emit "#{ _field }.#{ _val.fireEventOnChange }", _old[ _field ], _new[ _field ], id
 
 		if _saveMeta.affectedRows is 0
 			@_handleError( cb, "not-found" )

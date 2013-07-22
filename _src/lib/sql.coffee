@@ -67,6 +67,8 @@ module.exports = ( options, escape = mysql.escape )->
 
 			@define( "fields", @getFields, @setFields )
 
+			@getter( "fieldNames", @getFieldNames )
+
 			@define( "usefieldsets", @getUseFieldsets, @setUseFieldsets )
 
 			@define( "limit", @getLimit, @setLimit )
@@ -252,6 +254,10 @@ module.exports = ( options, escape = mysql.escape )->
 				for _k, _pred of key
 					@filter( _k, _pred )
 			else
+				if @_c.attrNames.length and key not in @_c.attrNames
+					@warning "invalid filter", @table, key
+					return @
+
 				# create the SQL where statement
 				_filter = "#{ key } "
 
@@ -718,17 +724,22 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		setFields: ( _fields = @config.fields )=>
 			if _.isFunction( _fields )
-				@_c.fields = _.pluck( _.filter(@attrs, _fields ), "name" )
+				setfields = _.pluck( _.filter(@attrs, _fields ), "name" )
 			else if _fields in  [ "all", "*" ]
-				@_c.fields = @_c.fieldlist
+				setfields = @_c.fieldlist
 			else if _fields in [ "idOnly", "idonly" ]
-				@_c.fields = [@idField]
+				setfields = [@idField]
 			else if @usefieldsets and _fields[..3] is "set:" and @_c.fieldsets[ _fields[4..] ]?
-				@_c.fields =  @_c.fieldsets[ _fields[4..] ]
+				setfields =  @_c.fieldsets[ _fields[4..] ]
 			else if _.isArray( _fields )
-				@_c.fields = _fields
+				setfields = _fields
 			else
-				@_c.fields = _fields.split( "," )
+				setfields = _fields.split( "," )
+
+			if @_c.attrNames.length
+				@_c.fields = _.intersection( setfields, @_c.attrNames )
+			else
+				@_c.fields = setfields
 			return
 
 		###
@@ -747,6 +758,23 @@ module.exports = ( options, escape = mysql.escape )->
 				@_c.fields.join( ", " )
 			else
 				"*"
+
+		###
+		## getFieldNames
+		
+		`sql.getFieldNames()`
+		
+		Get a list of fieldnames
+		
+		@return { String[] } Sql field list 
+		
+		@api private
+		###
+		getFieldNames: =>
+			if @_c.fields?.length
+				@_c.fields
+			else
+				[]
 
 		###
 		## setUseFieldsets
@@ -839,9 +867,9 @@ module.exports = ( options, escape = mysql.escape )->
 			_omited = _.difference( Object.keys( attrs ),_keys )
 			attrs = _.pick( attrs, _keys )
 			if _omited.length
-				@log "warning", "validateAttributes", "You tried to save to attributed not defined in the model config", _omited, attrs
+				@warning "validateAttributes", "You tried to save a attribute not defined in the model config of `#{ @table }`", _omited
 			else
-				@log "debug", "validateAttributes", attrs
+				@debug "validateAttributes", attrs
 			return attrs
 
 		###
@@ -943,7 +971,7 @@ module.exports = ( options, escape = mysql.escape )->
 							if _.isDate( _val )
 								_vals.push( escape( _val ) )
 								_keys.push( _key )
-							else if _.isDate( ( _m = moment( _val, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] ) )._d )
+							else if _.isDate( ( _m = moment( _val, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] ) )?._d )
 								_vals.push( escape( _m.format( "YYYY-MM-DD HH:mm" ) ) )
 								_keys.push( _key )
 

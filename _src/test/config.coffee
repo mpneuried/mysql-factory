@@ -6,7 +6,7 @@ module.exports  =
 		showQueryTime: true
 		host: if _envVars.MYSQLFAC_TEST_HOST? then _envVars.MYSQLFAC_TEST_HOST else 'localhost'
 		user: if _envVars.MYSQLFAC_TEST_USER? then _envVars.MYSQLFAC_TEST_USER else 'root'
-		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'never'
+		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'root'
 		database: if _envVars.MYSQLFAC_TEST_DB? then _envVars.MYSQLFAC_TEST_DB else "milonst_second"
 		timezone: "+0200"
 		logging: 

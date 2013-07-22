@@ -174,6 +174,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 		if options._customQueryFilter?
 			sql.filter( options._customQueryFilter )
 
+		if options._customQueryEnd?
+			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
+			return 
+
 		@factory.exec( sql.select(), @_handleList( "mget", filter, opt, cb ) )
 
 		return
@@ -265,9 +269,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql = @builder.clone()
 
-		if options._customQueryFilter?
-			@_handleError( cb, "deprecated-option", key: "_customQueryFilter" )
+		if options._customQueryEnd?
+			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
 			return 
+
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
 
 		sql.filter( filter )
 
@@ -284,9 +291,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql = @builder.clone()
 
-		if options._customQueryFilter?
-			@_handleError( cb, "deprecated-option", key: "_customQueryFilter" )
+		if options._customQueryEnd?
+			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
 			return 
+
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
 
 		sql.filter( filter )
 
@@ -490,7 +500,6 @@ module.exports = class MySQLTable extends require( "./basic" )
 	_getOptions: ( options, type )=>
 		_opt = @extend(
 			fields: "all"
-			_customQueryEnd: ""
 		, options )
 
 		return _opt

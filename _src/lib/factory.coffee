@@ -105,7 +105,7 @@ module.exports = class MySQLFactory extends require( "./basic" )
 
 			# define the return method to release the connection
 			args.push =>
-				conn.end()
+				conn.release()
 				@info "query time #{ ( Date.now() - _now ) }ms" if @config.showQueryTime
 				cb.apply( @, arguments )
 				return

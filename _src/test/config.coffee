@@ -83,7 +83,7 @@ module.exports  =
 				"city": 			{ name: "city",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"zip": 				{ name: "zip",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"lastlogin": 		{ name: "lastlogin",	fieldsets: [ "det" ], search: false, type: "timestamp" }
-				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { allreadyExistend: "email_unique" } }
+				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { allreadyExistend: "email" } }
 				"phone": 			{ name: "phone",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"mobile": 			{ name: "mobile",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"birthday": 		{ name: "birthday",		fieldsets: [ "det" ], search: false, type: "date", validation: { fireEventOnChange: "userchanged" } }

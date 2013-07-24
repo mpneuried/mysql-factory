@@ -67,6 +67,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 		@getter "sortdirection", =>
 			@settings.sortdirection or "desc"
 		
+		@define( "limit", ( =>@builder.defaultLimit ), ( ( _limit )=>@builder.defaultLimit = _limit ) )
+
 		super( options )
 		
 

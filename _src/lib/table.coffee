@@ -139,7 +139,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql.filter( @sIdField, ids )
 
-		@factory.exec( sql.select(), @_handleList( "mget", ids, opt, cb ) )
+		@factory.exec( sql.select(), @_handleList( "mget", ids, opt, sql, cb ) )
 
 		return
 
@@ -178,7 +178,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
 			return 
 
-		@factory.exec( sql.select(), @_handleList( "mget", filter, opt, cb ) )
+		@factory.exec( sql.select(), @_handleList( "mget", filter, opt, sql, cb ) )
 
 		return
 
@@ -282,28 +282,6 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		return
 
-	count: ( filter, cb, opt = {} )=>
-
-		cb = @_wrapCallback( cb )
-
-		# get the standard options
-		options = @_getOptions( opt, "count" )
-
-		sql = @builder.clone()
-
-		if options._customQueryEnd?
-			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
-			return 
-
-		if options._customQueryFilter?
-			sql.filter( options._customQueryFilter )
-
-		sql.filter( filter )
-
-		@factory.exec( sql.count(), @_handleSingle( "count", filter, opt, cb ) )
-
-		return
-
 	increment: ( id, field, cb, opt = {} )=>
 
 		@_crement( id, field, +1, cb, opt )
@@ -371,7 +349,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql.filter( @sIdField, id )
 
-		sql.fields = "#{ field } AS count"
+		sql.setFields( "#{ field } AS count", true )
 
 		_data = {}
 		_data[ field ] = "crmt" + count
@@ -560,13 +538,16 @@ module.exports = class MySQLTable extends require( "./basic" )
 			return
 
 	_handleList: ( type, args..., cb )=>
+		[ filter, opt, sql ] = args
 		return ( err, results, meta )=>
 			if err?
 				cb( err )
 				return
-
-			#@emit type, id, results
-			cb( null, @builder.convertToType( results ) )
+			if opt.fields in [ "idOnly", "idonly" ]
+				cb( null, _.pluck( results, @sIdField ) )
+			else
+				#@emit type, id, results
+				cb( null, @builder.convertToType( results ) )
 			return
 
 	_handleSave: ( type, id, data, options, sql, cb )=>

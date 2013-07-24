@@ -124,7 +124,7 @@ module.exports = ( options, escape = mysql.escape )->
 			statement = []
 			statement.push "INSERT INTO #{ @table }"
 
-			[ _keys, _vals ] = @_getSaveVariables( attributes )
+			[ _keys, _vals ] = @_getSaveVariables( attributes, true )
 			
 			statement.push( "( #{ _keys.join( ", " )} )" ) 
 			statement.push( "VALUES ( #{ _vals.join( ", " ) } )" )
@@ -150,7 +150,7 @@ module.exports = ( options, escape = mysql.escape )->
 			statement = []
 			statement.push "UPDATE #{ @table }"
 
-			[ _keys, _vals ] = @_getSaveVariables( attributes )
+			[ _keys, _vals ] = @_getSaveVariables( attributes, false )
 
 			_sets = []
 			for _key, _idx in _keys
@@ -257,7 +257,7 @@ module.exports = ( options, escape = mysql.escape )->
 					@filter( _k, _pred )
 			else
 				if @_c.attrNames.length and key not in @_c.attrNames
-					@warning "invalid filter", @table, key
+					@info "invalid filter", @table, key
 					return @
 
 				# create the SQL where statement
@@ -724,7 +724,7 @@ module.exports = ( options, escape = mysql.escape )->
 		
 		@api private
 		###
-		setFields: ( _fields = @config.fields )=>
+		setFields: ( _fields = @config.fields, special = false )=>
 			if _.isFunction( _fields )
 				setfields = _.pluck( _.filter(@attrs, _fields ), "name" )
 			else if _fields in  [ "all", "*" ]
@@ -738,7 +738,7 @@ module.exports = ( options, escape = mysql.escape )->
 			else
 				setfields = _fields.split( "," )
 
-			if @_c.attrNames.length
+			if not special and @_c.attrNames.length
 				@_c.fields = _.intersection( setfields, @_c.attrNames )
 			else
 				@_c.fields = setfields
@@ -899,7 +899,7 @@ module.exports = ( options, escape = mysql.escape )->
 			_omited = _.difference( Object.keys( attrs ),_keys )
 			attrs = _.pick( attrs, _keys )
 			if _omited.length
-				@warning "validateAttributes", "You tried to save a attribute not defined in the model config of `#{ @table }`", _omited
+				@info "validateAttributes", "You tried to save a attribute not defined in the model config of `#{ @table }`", _omited
 			else
 				@debug "validateAttributes", attrs
 			return attrs
@@ -935,7 +935,7 @@ module.exports = ( options, escape = mysql.escape )->
 		
 		@api private
 		###
-		_getSaveVariables: ( attributes )=> 
+		_getSaveVariables: ( attributes, isInsert = false )=> 
 			_keys = []
 			_vals = []
 			# loop through all attributes
@@ -944,8 +944,13 @@ module.exports = ( options, escape = mysql.escape )->
 				if _cnf
 					switch _cnf.type
 						when "string", "S"
+							if _val? and not _.isString( _val )
+								_val = _val.toString()
+
 							# create regular values
-							if _val?[ ..2 ] is "IF("
+							if not _val?
+								_vals.push( "NULL" )
+							else if _val?[ ..2 ] is "IF("
 								_vals.push( _val )
 							else
 								_vals.push( escape( _val ) )
@@ -953,7 +958,9 @@ module.exports = ( options, escape = mysql.escape )->
 
 						when "number", "N"
 							# create regular values
-							if _.isString( _val ) and _val?[ ..2 ] is "IF("
+							if not _val?
+								_vals.push( "NULL" )
+							else if _.isString( _val ) and _val?[ ..2 ] is "IF("
 								_vals.push( _val )
 							else if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()*1000" )
@@ -971,7 +978,7 @@ module.exports = ( options, escape = mysql.escape )->
 									_count = _count * -1
 								_vals.push( "IF( #{ _key } is NULL, #{ if _operand is "+" then 1 else 0 }, #{ _key } #{ _operand } #{ _count } )" )
 							else
-								_vals.push( escape( _val ) )
+								_vals.push( escape( parseFloat( _val ) ) )
 							_keys.push( _key )
 
 						when "boolean", "B"
@@ -982,7 +989,7 @@ module.exports = ( options, escape = mysql.escape )->
 
 						when "json", "object", "J", "O"
 							if not _val?
-								_vals.push( "{}" )
+								_vals.push( escape( "{}" ) )
 							else
 								try 
 									_vals.push( escape( JSON.stringify( _val ) ) )

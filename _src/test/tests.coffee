@@ -244,6 +244,31 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				, {} )
 				return
 
+			it "TABLE.FIND with limit by option", ( done )->
+
+				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
+				tbl.find( query, ( err, items )=>
+					throw err if err
+					items.should.have.length(1)
+					done()
+					return
+				, { limit: 1 } )
+				return
+
+			it "TABLE.FIND with `idonly`", ( done )->
+
+				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
+				tbl.find( query, ( err, items )=>
+					throw err if err
+					
+					items.should.be.an.instanceOf(Array)
+					for id in items
+						id.should.be.a('string')
+					done()
+					return
+				, { fields: "idonly" } )
+				return
+
 			it "TABLE.FIND with subquery", ( done )->
 
 				query = 
@@ -522,7 +547,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					done()
 					return
 
-				fnEvnt1 = ( field, oldValue, newValue, id )->
+				fnEvnt1 = ( oldValue, newValue, id )->
 					id.should.equal( _saveUserId )
 					oldValue.should.equal(  "Update2" )
 					newValue.should.equal(  "Update3" )
@@ -530,7 +555,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					return
 				tbl.on "lastname.userchanged", fnEvnt1
 
-				fnEvnt2 = ( field, oldValue, newValue, id )->
+				fnEvnt2 = ( oldValue, newValue, id )->
 					id.should.equal( _saveUserId )
 					should.not.exist( oldValue )
 					newValue.toUTCString().should.equal(new Date( 1950,5,15 ).toUTCString())
@@ -538,7 +563,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					return
 				tbl.on "birthday.userchanged", fnEvnt2
 				
-				fnEvnt3 = ( field, oldValue, newValue, id )->
+				fnEvnt3 = ( oldValue, newValue, id )->
 					id.should.equal( _saveUserId )
 					should.not.exist( oldValue )
 					newValue.should.equal(  "testimage.jpg" )
@@ -609,8 +634,6 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 					item.should.have.property('_u').and.equal( 4 )
 					item.should.have.property('_t').and.be.within( _saveUserT, +Infinity )
-
-					
 
 					done()
 					return

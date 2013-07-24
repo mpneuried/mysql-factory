@@ -81,6 +81,8 @@ module.exports = ( options, escape = mysql.escape )->
 
 			@getter( "where", @getWhere )
 
+			@define( "defaultLimit", @getDefaultLimit, @setDefaultLimit )
+
 			@log "debug", "initialized"
 
 			return
@@ -843,6 +845,36 @@ module.exports = ( options, escape = mysql.escape )->
 					"LIMIT #{ @_c.limit }"
 			else
 				"LIMIT #{ @config.limit }"
+
+		###
+		## setDefaultLimit
+		
+		`sql.setDefaultLimit( [_limit] )`
+		
+		Set the default maximum number of returned values
+		
+		@param { Number } [_limit] The number of returned elements. `0` for unlimited
+		
+		@api private
+		###
+		setDefaultLimit: ( _limit = @config.limit )=>
+			@config.limit = _limit
+			return
+
+
+		###
+		## getDefaultLimit
+		
+		`sql.getDefaultLimit()`
+		
+		Get the default `LIMIT` sql
+		
+		@return { String } The sql limit clause
+		
+		@api private
+		###
+		getDefaultLimit: =>
+			@config.limit
 
 		
 

@@ -81,6 +81,8 @@ module.exports = ( options, escape = mysql.escape )->
 
 			@getter( "where", @getWhere )
 
+			@getter( "isFiltered", @hasFilter )
+
 			@define( "defaultLimit", @getDefaultLimit, @setDefaultLimit )
 
 			@log "debug", "initialized"
@@ -263,14 +265,14 @@ module.exports = ( options, escape = mysql.escape )->
 				# create the SQL where statement
 				_filter = "#{ key } "
 
-				if not pred?
+				if pred is null
 					# is null if pred is `null`
 					_filter += "is NULL"
 				else if _.isString( pred ) or _.isNumber( pred )
 					# simple `=` filter
 					_filter += "= #{ escape( pred ) }"
 				else if _.isArray( pred )
-					# simple `=` filter
+					# simple `in (  )` filter
 					_filter += "in ( #{ escape( pred ) })"
 				else
 					# complex predicate filter
@@ -876,7 +878,19 @@ module.exports = ( options, escape = mysql.escape )->
 		getDefaultLimit: =>
 			@config.limit
 
+		###
+		## hasFilter
 		
+		`sql.hasFilter( id, cb )`
+		
+		Check if a filter is activated
+		
+		@return { Boolean } Is filtered 
+		
+		@api private
+		###
+		hasFilter: =>
+			return @_c.filters.length > 0
 
 	# # Private methods 
 

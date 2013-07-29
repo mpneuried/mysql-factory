@@ -312,7 +312,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		return
 
-	mdel: ( ids, cb, opt = {} )=>
+	mdel: ( filter, cb, opt = {} )=>
 		
 		cb = @_wrapCallback( cb )
 
@@ -321,12 +321,18 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql = @builder.clone()
 
-		for id in ids
-			sql.filter( @sIdField, id ).or()
+		sql.filter( filter )
+
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
+
+		if not sql.isFiltered
+			@_handleError( cb, "no-filter" )
+			return
 
 		stmts = [ sql.select( false ), sql.del() ]
 
-		@factory.exec( stmts, @_handleSingle( "mdel", ids, opt, cb ) )
+		@factory.exec( stmts, @_handleSingle( "mdel", filter, opt, sql, cb ) )
 
 		return
 
@@ -545,6 +551,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 			if err?
 				cb( err )
 				return
+
 			if opt.fields in [ "idOnly", "idonly" ]
 				cb( null, _.pluck( results, @sIdField ) )
 			else
@@ -661,3 +668,4 @@ module.exports = class MySQLTable extends require( "./basic" )
 			"validation-notequal": "`equalOldValue` validation error. The value of `<%= field %>` do not match the current save value. You tried to save `<%= value %>` but `<%= curr %>` is necessary"
 			"validation-already-existend": "The value `<%= value %>` for field `<%= field %>` already exists."
 			"invalid-field": "The field `<%= field %>` is not defined for the method `<%= method %>`"
+			"no-filter": "You have to define at least one valid filter"

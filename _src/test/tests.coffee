@@ -519,7 +519,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update2" )
-					item.should.have.property('password').and.include( "$2a$08$" )
+					item.should.have.property('password').and.include( "$2a$10$" )
 
 					item.should.have.property('_u').and.equal( 2 )
 					item.should.have.property('_t').and.be.within( _saveUserT, +Infinity )
@@ -876,18 +876,41 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				, {} )
 				return
 
+			it "TABLE.MDEL invalid filter", ( done )->
+				_usrA = _testUsers[ 1 ]
+				_usrB = _testUsers[ 2 ]
+				ids = [ _usrA.id, _usrB.id ]
+				tbl.mdel( user_id: ids, ( err, items )=>
+					should.exist( err )
+					should.exist( err.name )
+					err.name.should.equal( "no-filter" )
+
+					done()
+					return
+				, {} )
+				return
+
 			it "TABLE.MDEL", ( done )->
 				_usrA = _testUsers[ 1 ]
 				_usrB = _testUsers[ 2 ]
 				ids = [ _usrA.id, _usrB.id ]
-				tbl.mdel( ids, ( err, items )=>
+				tbl.mdel( id: ids, ( err, items )=>
 					throw err if err
-
 					_.difference(ids,_.pluck( items, "id" ) ).should.have.length(0)
 
 					done()
 					return
 				, {} )
+				return
+
+			it "TABLE.GET", ( done )->
+				_id =  _CONFIG.test.getTest.id
+				tbl.get _testUsers[ 1 ].id, ( err, item )=>
+					should.exist( err )
+					should.exist( err.name )
+					err.name.should.equal( "not-found" )
+					done()
+					return
 				return
 
 

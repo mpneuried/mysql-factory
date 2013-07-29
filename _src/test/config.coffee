@@ -75,7 +75,7 @@ module.exports  =
 			fields:
 				"id": 				{ name: "id",			fieldsets: [ "ls", "det", "test" ], search: false, type: "string" }
 				"thirdparty_id": 	{ name: "thirdparty_id",fieldsets: [ "det" ], search: false, type: "string" }
-				"password": 		{ name: "password",		fieldsets: [ "det" ], search: false, type: "string", validation: { bcrypt: { rounds: 8 } }  }
+				"password": 		{ name: "password",		fieldsets: [ "det" ], search: false, type: "string", validation: { bcrypt: { rounds: 10 } }  }
 				"isactive": 		{ name: "isactive",		fieldsets: [ "det" ], search: false, type: "boolean", validation: { fireEventOnChange: "userchanged" } }
 				"firstname": 		{ name: "firstname",	fieldsets: [ "ls", "det", "test" ], search: true,  type: "string", validation: { isRequired: true, fireEventOnChange: "userchanged" } }
 				"lastname": 		{ name: "lastname",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { isRequired: true, fireEventOnChange: "userchanged" } }

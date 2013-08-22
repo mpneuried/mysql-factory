@@ -664,10 +664,28 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				, {} )
 				return
 
+			it "TABLE.UPDATE without `_t", ( done )->
+				data =
+					lastname: "Update7b"
+
+				tbl.set( _saveUserId, data, ( err, item )=>
+					should.exist( err )
+					should.exist( err.name )
+					err.name.should.equal( "validation-notequal-required" )
+
+					should.exist( err.field )
+					err.field.should.equal( "_t" )
+
+					done()
+					return
+				, {} )
+				return
+
 			it "TABLE.UPDATE try a manual of `_u`", ( done )->
 				data =
 					lastname: "Update7"
 					_u: 99
+					_t: _saveUserT
 
 				tbl.set( _saveUserId, data, ( err, item )=>
 					throw err if err

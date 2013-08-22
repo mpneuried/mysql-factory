@@ -436,6 +436,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 				@_handleError( cb, "validation-required", field: field.name )
 				return
 
+			if not isUpdate and _validation.isRequired is true and not value?
+				@_handleError( cb, "validation-required", field: field.name )
+				return
+
 			if _validation.bcrypt? and value?
 				# change a crypt field to the crypted version
 				salt = bcrypt.genSaltSync( _validation.bcrypt.rounds or @config.defaultBcryptRounds )
@@ -467,8 +471,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 
 			# rules to be check after the return
-			
-			if options?.equalOldValueIgnore isnt true and _validation.equalOldValue is true and isUpdate is true and value?
+			if options?.equalOldValueIgnore isnt true and _validation.equalOldValue is true and isUpdate is true# and value?
+				# the field should exist
+				if not value?
+					@_handleError( cb, "validation-notequal-required", field: field.name )
+					return
 				# add a filter for the equal test. On return there has to be a check to detect the error based on the returning data.
 				sql.filter( field.name, value )
 				options._afterSave[ field.name ].checkEqualOld = true
@@ -663,6 +670,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 			"invalid-filter": "A filter has of the .find()` method to be an object"
 			"too-few-arguments": "To use the `.<%= method %>()` method you have to define at least `<%= min %>` arguments"
 			"validation-required": "The field `<%= field %>` is required."
+			"validation-notequal-required": "The field `<%= field %>` is required to do a validation equal the old value."
 			"value-not-allowed": "It's not allowed to write the value `<%= value %>`to the field `<%= field %>`"
 			"wrong-insert-return": "The select after the insert query returns the wrong row."
 			"validation-notequal": "`equalOldValue` validation error. The value of `<%= field %>` do not match the current save value. You tried to save `<%= value %>` but `<%= curr %>` is necessary"

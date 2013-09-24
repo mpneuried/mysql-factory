@@ -20,6 +20,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 		describe 'Initialization', ->
 			it 'init factory', ( done )->
+				console.log _CONFIG.mysql
 				DBFactory = new MySQLFactory( _CONFIG.mysql, _CONFIG.tables )
 				done()
 				return

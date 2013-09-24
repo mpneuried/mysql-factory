@@ -357,7 +357,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql.filter( @sIdField, id )
 
-		sql.setFields( "#{ field } AS count", true )
+		sql.setFields( "#{sql.fields}, #{ field } AS count", true )
 
 		_data = {}
 		_data[ field ] = "crmt" + count
@@ -525,7 +525,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				else if type in [ "mdel" ]
 					[ _get, _save ] = results
 					if not _save?.affectedRows
-						@_handleError( cb, "not-found" )
+						cb( null, [] )
 						return
 					results = _get
 				else
@@ -542,6 +542,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 						cb( null, parseInt( results?.count, 10 ) )
 					else
 						cb( null, 0 )
+
+					@emit( type, null, @builder.convertToType( results ) )
 				else
 
 					if not results?
@@ -549,7 +551,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 						return
 
 					#@emit type, id, results
-					cb( null, @builder.convertToType( results ) )
+					_ret = @builder.convertToType( results ) 
+					cb( null, _ret )
+					
+					@emit( type, null, _ret )
+
 			return
 
 	_handleList: ( type, args..., cb )=>

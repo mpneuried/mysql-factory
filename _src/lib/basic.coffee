@@ -138,8 +138,7 @@ module.exports = class Basic extends require('events').EventEmitter
 			_err = err
 
 		if errExnd?
-			for _k, _v in errExnd
-				_err[ _k ] = _v
+			_err.data = errExnd
 
 		for _k, _v of data 
 			_err[ _k ] = _v

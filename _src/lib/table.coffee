@@ -635,7 +635,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		for _field, _val of options._afterSave when not _.isEmpty( _val )
 			if id? and _val.checkEqualOld? and _saveMeta.affectedRows is 0
-				@_handleError( cb, "validation-notequal", { field: _field, curr: _old?[ _field ], value: options?._changedValues?[ _field ] or data[ _field ] } )
+				_errData =
+					value: options?._changedValues?[ _field ] or data[ _field ]
+					field:
+						name: _field
+				@_handleError( cb, "validation-notequal", { field: _field, curr: _old?[ _field ], value: _errData.value }, _errData )
 				return
 
 			if id? and _val.fireEventOnChange? and _old?[ _field ] isnt _new?[ _field ]

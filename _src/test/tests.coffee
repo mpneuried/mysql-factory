@@ -12,6 +12,8 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			if count is 0
 				cb()
 			return
+	
+	console.log "\nCONFIG:\n", _CONFIG.mysql
 
 	describe "----- #{ testTitle } TESTS -----", ->
 		before ( done )->
@@ -20,7 +22,6 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 		describe 'Initialization', ->
 			it 'init factory', ( done )->
-				console.log _CONFIG.mysql
 				DBFactory = new MySQLFactory( _CONFIG.mysql, _CONFIG.tables )
 				done()
 				return
@@ -720,6 +721,106 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( err.value )
 					err.value.should.equal( "testmilon@test.de" )
 					
+					done()
+					return
+				, {} )
+				return
+
+			it "TABLE.UPDATE date fields as `Date`", ( done )->
+				_date = new Date()
+				data =
+					lastname: "Update8"
+					lastlogin: _date
+					deletedate: _date
+					_t: _saveUserT
+
+
+				tbl.set( _saveUserId, data, ( err, item )=>
+					throw err if err
+
+					item.should.have.property('lastlogin').and.equal( Math.round( _date.getTime() / 1000 ) )
+					item.should.have.property('deletedate').and.equal( _date.getTime() )
+
+					item.should.have.property('lastname').and.equal( "Update8" )
+					item.should.have.property('_u').and.equal( 6 )
+					
+					_saveUserT = item._t
+
+					done()
+					return
+				, {} )
+				return
+
+			it "TABLE.UPDATE date fields as `Number` in ms", ( done )->
+				_date = new Date().getTime()
+				data =
+					lastname: "Update9"
+					lastlogin: _date
+					deletedate: _date
+					_t: _saveUserT
+
+
+				tbl.set( _saveUserId, data, ( err, item )=>
+					throw err if err
+
+					item.should.have.property('lastlogin').and.equal( Math.round( _date / 1000 ) )
+					item.should.have.property('deletedate').and.equal( _date )
+
+					item.should.have.property('lastname').and.equal( "Update9" )
+					item.should.have.property('_u').and.equal( 7 )
+					
+					_saveUserT = item._t
+
+					done()
+					return
+				, {} )
+				return
+
+			it "TABLE.UPDATE date fields as `Number` in s", ( done )->
+				_date = Math.round( new Date().getTime() / 1000 )
+				data =
+					lastname: "Update10"
+					lastlogin: _date
+					deletedate: _date
+					_t: _saveUserT
+
+
+				tbl.set( _saveUserId, data, ( err, item )=>
+					throw err if err
+
+					item.should.have.property('lastlogin').and.equal( _date )
+					item.should.have.property('deletedate').and.equal( _date * 1000 )
+
+					item.should.have.property('lastname').and.equal( "Update10" )
+					item.should.have.property('_u').and.equal( 8 )
+					
+					_saveUserT = item._t
+
+					done()
+					return
+				, {} )
+				return
+
+			it "TABLE.UPDATE date fields as `String`", ( done )->
+				_date = moment( moment().format( "YYYY-MM-DD HH:mm" ), "YYYY-MM-DD HH:mm" )
+				data =
+					lastname: "Update11"
+					lastlogin: _date.format( "YYYY-MM-DD HH:mm" )
+					deletedate: _date.format( "YYYY-MM-DD HH:mm" )
+					_t: _saveUserT
+
+
+				tbl.set( _saveUserId, data, ( err, item )=>
+					throw err if err
+
+					item.should.have.property('lastlogin').and.equal( _date.unix() )
+					item.should.have.property('deletedate').and.equal( _date.valueOf() )
+
+					item.should.have.property('lastname').and.equal( "Update11" )
+					item.should.have.property('_u').and.equal( 9 )
+					
+					_saveUserT = item._t
+
 					done()
 					return
 				, {} )

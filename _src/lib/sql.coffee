@@ -451,7 +451,7 @@ module.exports = ( options, escape = mysql.escape )->
 								@error "JSON parse error", value
 								return {}
 
-						when "timestamp", "T"
+						when "timestamp", "T", "unixtimestamp", "U"
 							return parseInt( value, 10 )
 
 						when "date", "D"
@@ -1012,6 +1012,35 @@ module.exports = ( options, escape = mysql.escape )->
 						when "timestamp", "T"
 							if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()*1000" )
+							else if _.isDate( _val )
+								_vals.push( Math.round( _val.getTime() ) )
+							else if _.isString( _val )
+								_d = moment( _val, _cnf.dateFormat or [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] )
+								_vals.push( _d.valueOf() )
+							else if _.isNumber( _val )
+								# convert s timestamp to ms
+								if _val.toString().length is 10
+									_vals.push( Math.round( _val * 1000 ) )
+								else
+									_vals.push( escape( _val ) )
+							else
+								_vals.push( escape( _val ) )
+							_keys.push( _key )
+
+						when "unixtimestamp", "U"
+							if _val is "now"
+								_vals.push( "UNIX_TIMESTAMP()" )
+							else if _.isDate( _val )
+								_vals.push( Math.round( _val.getTime() / 1000 ) )
+							else if _.isString( _val )
+								_d = moment( _val, _cnf.dateFormat or [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] )
+								_vals.push( _d.unix() )
+							else if _.isNumber( _val )
+								# convert ms timestamp to s
+								if _val.toString().length is 13
+									_vals.push( Math.round( _val / 1000 ) )
+								else
+									_vals.push( escape( _val ) )
 							else
 								_vals.push( escape( _val ) )
 							_keys.push( _key )

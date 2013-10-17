@@ -445,7 +445,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				salt = bcrypt.genSaltSync( _validation.bcrypt.rounds or @config.defaultBcryptRounds )
 				data[ field.name ] = bcrypt.hashSync( value, salt )
 
-			if _validation.setTimestamp is true and field.type in [ "string", "number", "S", "N", "timestamp", "T", "date", "D" ]
+			if _validation.setTimestamp is true and field.type in [ "string", "number", "S", "N", "unixtimestamp", "U", "timestamp", "T", "date", "D" ]
 				# special command to run `UNIX_TIMESTAMP()*1000`
 				options._changedValues[ field.name ] = data[ field.name ]
 				data[ field.name ] = "now"

@@ -82,7 +82,7 @@ module.exports  =
 				"address": 			{ name: "address",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"city": 			{ name: "city",			fieldsets: [ "det" ], search: true,  type: "string" }
 				"zip": 				{ name: "zip",			fieldsets: [ "det" ], search: true,  type: "string" }
-				"lastlogin": 		{ name: "lastlogin",	fieldsets: [ "det" ], search: false, type: "timestamp" }
+				"lastlogin": 		{ name: "lastlogin",	fieldsets: [ "det" ], search: false, type: "unixtimestamp" }
 				"email": 			{ name: "email",		fieldsets: [ "ls", "det" ], search: true,  type: "string", validation: { allreadyExistend: "email" } }
 				"phone": 			{ name: "phone",		fieldsets: [ "det" ], search: true,  type: "string" }
 				"mobile": 			{ name: "mobile",		fieldsets: [ "det" ], search: true,  type: "string" }
@@ -90,7 +90,7 @@ module.exports  =
 				"gender":	 		{ name: "gender",		fieldsets: [ "det" ], search: false, type: "boolean", validation: { isRequired: true } }
 				"image":	 		{ name: "image",		fieldsets: [ "ls","det" ], search: false, type: "string", validation: { fireEventOnChange: "userchanged" }  }
 				"isdeleted": 		{ name: "isdeleted",	fieldsets: [], search: false, type: "boolean" }
-				"deletedate": 		{ name: "deletedate",	fieldsets: [], search: false, type: "date" }
+				"deletedate": 		{ name: "deletedate",	fieldsets: [], search: false, type: "timestamp" }
 				"role": 			{ name: "role",			fieldsets: [ "det" ], search: false, type: "string", validation: { isRequired: true, notAllowedForValue: "MILON" } }
 				"trainer_id": 		{ name: "trainer_id",	fieldsets: [ "ls", "det" ], search: false, type: "string", validation: { fireEventOnChange: "userchanged" } }
 				"plansversion":		{ name: "plansversion",	fieldsets: [ "det" ], search: false, type: "number" }

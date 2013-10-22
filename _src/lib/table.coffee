@@ -28,12 +28,9 @@ module.exports = class MySQLTable extends require( "./basic" )
 			sortfield: "id"
 			sortdirection: "decs"
 			fields: {}
-			createIdString: null
-
-			defaultBcryptRounds: 8
 
 			createIdString: ->utils.randomString( 5 )
-
+			defaultBcryptRounds: 8
 			stringIdInsertRetrys: 5
 
 	###	
@@ -66,6 +63,9 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		@getter "sortdirection", =>
 			@settings.sortdirection or "desc"
+
+		@getter "createIdString", =>
+			@settings.createIdString or @config.createIdString
 		
 		@define( "limit", ( =>@builder.defaultLimit ), ( ( _limit )=>@builder.defaultLimit = _limit ) )
 
@@ -490,8 +490,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 			return
 
 	_generateNewID: ( id )=>
-		if not id? 
-			id = @config.createIdString()
+		if not id? and @hasStringId
+			id = @createIdString()
 
 		return id
 

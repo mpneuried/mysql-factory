@@ -428,6 +428,24 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				, {} )
 				return
 
+			it "TABLE.INSERT with createId function", ( done )->
+				_tbl = DBFactory.get( "Apikeys" )
+				
+				data =
+					studio_id: 1
+					jsonOptions: {}
+
+				_tbl.set( data, ( err, item )=>
+					throw err if err
+
+					item.should.have.property('apikey').and.match( /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/ )
+					item.should.have.property('studio_id').and.equal( 1 )
+
+					done()
+					return
+				, {} )
+				return
+
 			it "TABLE.INSERT autoincrement-id", ( done )->
 				data = JSON.parse( JSON.stringify( _CONFIG.test.insertTestToken ) )
 				tbl2.set( data, ( err, item )=>

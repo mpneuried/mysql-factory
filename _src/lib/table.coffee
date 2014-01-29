@@ -161,6 +161,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 		if options.fields?
 			sql.fields = options.fields
 
+		if options.orderby?
+			sql.orderfield = options.orderby
+
+		if options.forward?
+			sql.forward = options.forward
+
 		if filter?.limit?
 			sql.limit = filter.limit
 			if filter.offset?

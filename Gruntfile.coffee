@@ -47,7 +47,7 @@ module.exports = (grunt) ->
 					suffix: ''
 
 				files:
-					"": ["index.js"]
+					"index.js": ["index.js"]
 
 		docker:
 			codedocs:

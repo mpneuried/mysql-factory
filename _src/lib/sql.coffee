@@ -458,7 +458,7 @@ module.exports = ( options, escape = mysql.escape )->
 							if _.isDate( value )
 								return value
 							else
-								return moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] )
+								return moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] ).toDate()
 
 						when "array", "A"
 							return setToArray( value )

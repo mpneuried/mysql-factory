@@ -265,7 +265,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					
 					items.should.be.an.instanceOf(Array)
 					for id in items
-						id.should.be.a('string')
+						id.should.be.a.String
 					done()
 					return
 				, { fields: "idonly" } )

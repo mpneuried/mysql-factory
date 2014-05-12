@@ -317,6 +317,9 @@ module.exports = ( options, escape = mysql.escape )->
 							subtable.fields = _val.field
 							subtable.filter( _val.filter )
 							_filter += "in ( #{ subtable.select( false ) })"
+
+						when "custom"
+							_filter += if _val? then "#{  _val }"
 				
 				# combine the filters with a `AND` or an `OR`
 				if @_c.filters?.length

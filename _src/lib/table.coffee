@@ -649,7 +649,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				return
 
 			if id? and _val.fireEventOnChange? and _old?[ _field ] isnt _new?[ _field ]
-				@emit "#{ _field }.#{ _val.fireEventOnChange }", _old[ _field ], _new[ _field ], id, _new, options
+				@emit "#{ _field }.#{ _val.fireEventOnChange }", _old[ _field ], _new[ _field ], id, _new
 
 		if _saveMeta.affectedRows is 0
 			@_handleError( cb, "not-found" )

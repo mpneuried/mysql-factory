@@ -44,20 +44,21 @@
     }
 
     DBConnector.prototype.connect = function(callback) {
-      var _this = this;
       if (this["native"]) {
         if (!this.isConnected) {
           this._log(2, "connect:start", this["native"]);
           this.isConnecting = true;
           ++this.runningConnections;
-          this["native"].connect(function(err, results) {
-            if (err) {
-              _this._log(1, "connect", err);
-              throw err;
-            }
-            _this._connectDatabase(callback);
-            _this._log(2, "connect:done");
-          });
+          this["native"].connect((function(_this) {
+            return function(err, results) {
+              if (err) {
+                _this._log(1, "connect", err);
+                throw err;
+              }
+              _this._connectDatabase(callback);
+              _this._log(2, "connect:done");
+            };
+          })(this));
         } else {
           this._log(2, "connect:allready-connected", err);
           if (callback) {
@@ -128,20 +129,21 @@
     };
 
     DBConnector.prototype._connectDatabase = function(callback) {
-      var _this = this;
       this._log(2, "use:start");
-      this["native"].query("USE " + this.database, function(err, results) {
-        if (err) {
-          throw err;
-        }
-        _this.isConnected = true;
-        _this.isConnecting = false;
-        if (callback) {
-          callback();
-        }
-        _this._runQueue();
-        _this.emit("connected", true);
-      });
+      this["native"].query("USE " + this.database, (function(_this) {
+        return function(err, results) {
+          if (err) {
+            throw err;
+          }
+          _this.isConnected = true;
+          _this.isConnecting = false;
+          if (callback) {
+            callback();
+          }
+          _this._runQueue();
+          _this.emit("connected", true);
+        };
+      })(this));
       this._log(2, "use:done");
     };
 

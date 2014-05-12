@@ -102,8 +102,7 @@
     };
 
     Datamodel.prototype.get = function(id, callback, options) {
-      var filter, fnGet,
-        _this = this;
+      var filter, fnGet;
       options = _.extend({
         type: "get",
         forceDBload: false,
@@ -117,14 +116,16 @@
         return this.connector.query(sStatement, filterReturn.args, _.bind(this._singleReturn, this, options, filter, callback));
       };
       if (this.settings.useRedisCache && this.cachekey && !options.forceDBload) {
-        this.redis.get(this.cachekey + id, function(err, res) {
-          if (res === null) {
-            filter[_this.sIdField] = id;
-            return fnGet.call(_this, filter, callback, options);
-          } else {
-            return _this._generalReturnObject(0, callback, JSON.parse(res), options.type);
-          }
-        });
+        this.redis.get(this.cachekey + id, (function(_this) {
+          return function(err, res) {
+            if (res === null) {
+              filter[_this.sIdField] = id;
+              return fnGet.call(_this, filter, callback, options);
+            } else {
+              return _this._generalReturnObject(0, callback, JSON.parse(res), options.type);
+            }
+          };
+        })(this));
       } else {
         if (_.isArray(this.sIdField) && !(_.isString(id) || _.isNumber(id))) {
           fnGet.call(this, id, callback, options);
@@ -232,8 +233,7 @@
     };
 
     Datamodel.prototype.set = function(id, data, callback, options) {
-      var aRelationKeys, args, filter, isUpdate,
-        _this = this;
+      var aRelationKeys, args, filter, isUpdate;
       filter = {};
       args = [];
       aRelationKeys = this._getRelationKeys();
@@ -260,97 +260,98 @@
       options = _.extend({
         type: "set"
       }, this.defaultGetOptions, options);
-      this.validate(isUpdate, id, data, callback, options, function(data) {
-        var dataReturn, filterReturn, fnInsert, sStatement;
-        if (isUpdate) {
-          dataReturn = _this._generateSetOrUpdate(false, data, args);
-          args = dataReturn.args;
-          if (_.isNumber(id) || _.isString(id)) {
-            filter[_this.sIdField] = id;
-          } else {
-            filter = id;
-          }
-          filterReturn = _this._generateFilter(filter, args);
-          args = filterReturn.args;
-          sStatement = options._customQueryUpdate || ("UPDATE " + _this.tablename + " " + dataReturn.statement + " " + filterReturn.filter);
-          return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, callback));
-        } else {
-          fnInsert = function(data) {
-            var aDataKeys, aRelDataKeys, fnSeriesCall, fnSet, idKey, idx, relkey, _i, _len;
-            aDataKeys = _.keys(data);
-            aRelDataKeys = _.intersection(aRelationKeys, aDataKeys);
-            if (_.isArray(_this.sIdField)) {
-              for (idKey in _this.sIdField) {
-                if (filter[idKey] = data[idKey]) {
-                  filter[idKey] = data[idKey];
-                }
-              }
-            } else if (data[_this.sIdField]) {
-              filter[_this.sIdField] = data[_this.sIdField];
-            }
-            dataReturn = _this._generateSetOrUpdate(true, _.reduce(data, function(memo, obj, key) {
-              if (_.indexOf(aRelDataKeys, key) < 0) {
-                memo[key] = obj;
-              }
-              return memo;
-            }, {}));
-            sStatement = ("INSERT INTO " + _this.tablename) + dataReturn.statement;
+      this.validate(isUpdate, id, data, callback, options, (function(_this) {
+        return function(data) {
+          var dataReturn, filterReturn, fnInsert, sStatement;
+          if (isUpdate) {
+            dataReturn = _this._generateSetOrUpdate(false, data, args);
             args = dataReturn.args;
-            if (aRelDataKeys.length) {
-              fnSeriesCall = {};
-              fnSeriesCall[_this.tablename] = function(cb) {
-                return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, function(err, res) {
-                  return cb(err, res);
-                }));
-              };
-              for (idx = _i = 0, _len = aRelDataKeys.length; _i < _len; idx = ++_i) {
-                relkey = aRelDataKeys[idx];
-                if (_this._hasRelation(relkey)) {
-                  fnSet = _this._getRelation(relkey).set;
-                  if (fnSet) {
-                    fnSeriesCall[relkey] = function(cb) {
-                      return fnSet(id[_this.sIdField], data[relkey], function(err, res) {
-                        return cb(err, res);
-                      });
-                    };
+            if (_.isNumber(id) || _.isString(id)) {
+              filter[_this.sIdField] = id;
+            } else {
+              filter = id;
+            }
+            filterReturn = _this._generateFilter(filter, args);
+            args = filterReturn.args;
+            sStatement = options._customQueryUpdate || ("UPDATE " + _this.tablename + " " + dataReturn.statement + " " + filterReturn.filter);
+            return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, callback));
+          } else {
+            fnInsert = function(data) {
+              var aDataKeys, aRelDataKeys, fnSeriesCall, fnSet, idKey, idx, relkey, _i, _len;
+              aDataKeys = _.keys(data);
+              aRelDataKeys = _.intersection(aRelationKeys, aDataKeys);
+              if (_.isArray(_this.sIdField)) {
+                for (idKey in _this.sIdField) {
+                  if (filter[idKey] = data[idKey]) {
+                    filter[idKey] = data[idKey];
                   }
                 }
+              } else if (data[_this.sIdField]) {
+                filter[_this.sIdField] = data[_this.sIdField];
               }
-              return async.series(fnSeriesCall, function(err, res) {
-                var oReturn;
-                oReturn = {};
-                if (!err) {
-                  oReturn = res[_this.tablename];
-                  delete res[_this.tablename];
-                  return callback(err, _.extend(oReturn, _.reduce(res, function(memo, obj, key) {
-                    if (key !== this.tablename) {
-                      memo[key] = obj;
-                    }
-                    return memo;
-                  }, _this)));
-                } else {
-                  return callback(err, res);
+              dataReturn = _this._generateSetOrUpdate(true, _.reduce(data, function(memo, obj, key) {
+                if (_.indexOf(aRelDataKeys, key) < 0) {
+                  memo[key] = obj;
                 }
+                return memo;
+              }, {}));
+              sStatement = ("INSERT INTO " + _this.tablename) + dataReturn.statement;
+              args = dataReturn.args;
+              if (aRelDataKeys.length) {
+                fnSeriesCall = {};
+                fnSeriesCall[_this.tablename] = function(cb) {
+                  return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, function(err, res) {
+                    return cb(err, res);
+                  }));
+                };
+                for (idx = _i = 0, _len = aRelDataKeys.length; _i < _len; idx = ++_i) {
+                  relkey = aRelDataKeys[idx];
+                  if (_this._hasRelation(relkey)) {
+                    fnSet = _this._getRelation(relkey).set;
+                    if (fnSet) {
+                      fnSeriesCall[relkey] = function(cb) {
+                        return fnSet(id[_this.sIdField], data[relkey], function(err, res) {
+                          return cb(err, res);
+                        });
+                      };
+                    }
+                  }
+                }
+                return async.series(fnSeriesCall, function(err, res) {
+                  var oReturn;
+                  oReturn = {};
+                  if (!err) {
+                    oReturn = res[_this.tablename];
+                    delete res[_this.tablename];
+                    return callback(err, _.extend(oReturn, _.reduce(res, function(memo, obj, key) {
+                      if (key !== this.tablename) {
+                        memo[key] = obj;
+                      }
+                      return memo;
+                    }, _this)));
+                  } else {
+                    return callback(err, res);
+                  }
+                });
+              } else {
+                return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, callback));
+              }
+            };
+            if (_this.hasStringId) {
+              return _this._generateNewID(data[_this.sIdField], function(newId) {
+                data[_this.sIdField] = newId;
+                filter[_this.sIdField] = newId;
+                return fnInsert(data);
               });
             } else {
-              return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, callback));
-            }
-          };
-          if (_this.hasStringId) {
-            return _this._generateNewID(data[_this.sIdField], function(newId) {
-              data[_this.sIdField] = newId;
-              filter[_this.sIdField] = newId;
               return fnInsert(data);
-            });
-          } else {
-            return fnInsert(data);
+            }
           }
-        }
-      });
+        };
+      })(this));
     };
 
     Datamodel.prototype.del = function(id, callback, options) {
-      var _this = this;
       if (_.isNumber(id) || _.isString(id)) {
         id = {
           id: id
@@ -360,19 +361,20 @@
         type: "del",
         useValidation: false
       }, this.defaultGetOptions, options);
-      this.get(id.id, function(err, res) {
-        if (!err) {
-          options.data2del = [res];
-          _this.mdel(id, callback, options);
-        } else {
-          _this._generalReturnObject("notfound", callback, res, options.type);
-        }
-      });
+      this.get(id.id, (function(_this) {
+        return function(err, res) {
+          if (!err) {
+            options.data2del = [res];
+            _this.mdel(id, callback, options);
+          } else {
+            _this._generalReturnObject("notfound", callback, res, options.type);
+          }
+        };
+      })(this));
     };
 
     Datamodel.prototype.mdel = function(filter, callback, options) {
-      var filterSave, fnDel,
-        _this = this;
+      var filterSave, fnDel;
       options = _.extend({
         type: "mdel",
         data2del: null,
@@ -380,61 +382,65 @@
       }, this.defaultGetOptions, options);
       filter || (filter = {});
       filterSave = utils.extend(true, {}, filter);
-      fnDel = function(filter, callback, options) {
-        var fnQueuryDel, oFilter, validation;
-        if (filter) {
-          fnQueuryDel = function(oFilter) {
-            var filterReturn, sStatement;
-            if (options._customQueryFilter != null) {
-              filterReturn = options._customQueryFilter(filter);
-            } else {
-              filterReturn = _this._generateFilter(filter);
-            }
-            sStatement = "DELETE FROM " + _this.tablename + " " + filterReturn.filter;
-            return _this.connector.query(sStatement, filterReturn.args, _.bind(_this._delReturn, _this, options, oFilter, callback));
-          };
-          oFilter = {};
-          if (_.isArray(filter)) {
-            if (filter.length > 1) {
+      fnDel = (function(_this) {
+        return function(filter, callback, options) {
+          var fnQueuryDel, oFilter, validation;
+          if (filter) {
+            fnQueuryDel = function(oFilter) {
+              var filterReturn, sStatement;
+              if (options._customQueryFilter != null) {
+                filterReturn = options._customQueryFilter(filter);
+              } else {
+                filterReturn = _this._generateFilter(filter);
+              }
+              sStatement = "DELETE FROM " + _this.tablename + " " + filterReturn.filter;
+              return _this.connector.query(sStatement, filterReturn.args, _.bind(_this._delReturn, _this, options, oFilter, callback));
+            };
+            oFilter = {};
+            if (_.isArray(filter)) {
+              if (filter.length > 1) {
+                oFilter[_this.sIdField] = filter;
+              } else if (filter.length === 1) {
+                oFilter[_this.sIdField] = filter[0];
+              }
+            } else if (_.isString(filter) || _.isNumber(filter) || _.isBoolean(filter)) {
               oFilter[_this.sIdField] = filter;
-            } else if (filter.length === 1) {
-              oFilter[_this.sIdField] = filter[0];
-            }
-          } else if (_.isString(filter) || _.isNumber(filter) || _.isBoolean(filter)) {
-            oFilter[_this.sIdField] = filter;
-          } else {
-            oFilter = filter;
-          }
-          if (oFilter.id !== void 0 && _this._hasField(_timestampField)) {
-            if (options.useValidation) {
-              validation = _this._validateField(_this._getField(_timestampField), oFilter[_timestampField], options.data2del[0][_timestampField], true, oFilter.id, options, callback);
-            }
-            if (!options.useValidation || validation.success) {
-              fnQueuryDel(oFilter);
             } else {
-              return;
+              oFilter = filter;
+            }
+            if (oFilter.id !== void 0 && _this._hasField(_timestampField)) {
+              if (options.useValidation) {
+                validation = _this._validateField(_this._getField(_timestampField), oFilter[_timestampField], options.data2del[0][_timestampField], true, oFilter.id, options, callback);
+              }
+              if (!options.useValidation || validation.success) {
+                fnQueuryDel(oFilter);
+              } else {
+                return;
+              }
+            } else {
+              fnQueuryDel(oFilter);
+              if (oFilter.id === void 0) {
+                console.log("!WARNING! DELETE without id!", filter, options.data2del);
+              }
             }
           } else {
-            fnQueuryDel(oFilter);
-            if (oFilter.id === void 0) {
-              console.log("!WARNING! DELETE without id!", filter, options.data2del);
-            }
+            _this._generalReturnObject("passed-empty", callback, [], options.type);
           }
-        } else {
-          _this._generalReturnObject("passed-empty", callback, [], options.type);
-        }
-      };
+        };
+      })(this);
       if (!options.data2del) {
-        this.find(filter, function(err, res) {
-          if (!err && res.length) {
-            options.data2del = res;
-            fnDel(filterSave, callback, options);
-          } else if (!err) {
-            _this._generalReturnObject("notfound", callback, res, options.type);
-          } else {
-            callback(err, res);
-          }
-        });
+        this.find(filter, (function(_this) {
+          return function(err, res) {
+            if (!err && res.length) {
+              options.data2del = res;
+              fnDel(filterSave, callback, options);
+            } else if (!err) {
+              _this._generalReturnObject("notfound", callback, res, options.type);
+            } else {
+              callback(err, res);
+            }
+          };
+        })(this));
       } else {
         fnDel(filter, callback, options);
       }
@@ -455,8 +461,7 @@
     };
 
     Datamodel.prototype._crement = function(id, column, value, callback, options) {
-      var field, filter, filterReturn, sStatement,
-        _this = this;
+      var field, filter, filterReturn, sStatement;
       options = _.extend({
         type: "_crement"
       }, this.defaultGetOptions, options);
@@ -473,80 +478,84 @@
       field = this._getField(column);
       if (field && field.type === "number") {
         sStatement = "UPDATE " + this.tablename + " SET " + column + " = " + column + " + " + value + " " + filterReturn.filter;
-        this.connector.query(sStatement, filterReturn.args, function(err, res) {
-          if (!err) {
-            filterReturn = _this._generateFilter(filter);
-            sStatement = "SELECT " + column + " AS count FROM " + _this.tablename + " " + filterReturn.filter;
-            _this.connector.query(sStatement, filterReturn.args, _.bind(_this._countReturn, _this, options, filter, callback));
-          } else {
-            _this._generalReturnObject("sql-error", callback, [], options.type);
-          }
-        });
+        this.connector.query(sStatement, filterReturn.args, (function(_this) {
+          return function(err, res) {
+            if (!err) {
+              filterReturn = _this._generateFilter(filter);
+              sStatement = "SELECT " + column + " AS count FROM " + _this.tablename + " " + filterReturn.filter;
+              _this.connector.query(sStatement, filterReturn.args, _.bind(_this._countReturn, _this, options, filter, callback));
+            } else {
+              _this._generalReturnObject("sql-error", callback, [], options.type);
+            }
+          };
+        })(this));
       } else {
         this._generalReturnObject("not-a-numberfield", callback, [], options.type);
       }
     };
 
     Datamodel.prototype.validate = function(isUpdate, id, data, callback, options, fn) {
-      var fnValidate, useGet,
-        _this = this;
-      fnValidate = function(oldData) {
-        var aCheckFns, aErrors, field, fieldname, _ref;
-        if (oldData == null) {
-          oldData = {};
-        }
-        aErrors = [];
-        aCheckFns = [];
-        _ref = _this.fields;
-        for (fieldname in _ref) {
-          field = _ref[fieldname];
-          aCheckFns.push(_.bind(_this._validateField, _this, field, (data && data[fieldname] !== void 0 ? data[fieldname] : null), (isUpdate && oldData && oldData[fieldname] !== void 0 ? oldData[fieldname] : null), isUpdate, id, options));
-        }
-        async.parallel(aCheckFns, function(err, validations) {
-          var error, validation, _err, _i, _len;
-          for (_i = 0, _len = validations.length; _i < _len; _i++) {
-            validation = validations[_i];
-            if (!(validation !== null)) {
-              continue;
-            }
-            if (validation.value !== null) {
-              data[validation.field.name] = validation.value;
-            }
-            if (!validation.success) {
-              aErrors.push(validation);
-            }
+      var fnValidate, useGet;
+      fnValidate = (function(_this) {
+        return function(oldData) {
+          var aCheckFns, aErrors, field, fieldname, _ref;
+          if (oldData == null) {
+            oldData = {};
           }
-          if (aErrors.length) {
-            error = _.first(aErrors);
-            _err = {
-              message: "this value already exists",
-              field: error.field.name,
-              data: error,
-              success: false
-            };
-            _this._generalReturnObject(error.type, callback, _err, null);
-          } else {
-            fn(data);
+          aErrors = [];
+          aCheckFns = [];
+          _ref = _this.fields;
+          for (fieldname in _ref) {
+            field = _ref[fieldname];
+            aCheckFns.push(_.bind(_this._validateField, _this, field, (data && data[fieldname] !== void 0 ? data[fieldname] : null), (isUpdate && oldData && oldData[fieldname] !== void 0 ? oldData[fieldname] : null), isUpdate, id, options));
           }
-        });
-      };
+          async.parallel(aCheckFns, function(err, validations) {
+            var error, validation, _err, _i, _len;
+            for (_i = 0, _len = validations.length; _i < _len; _i++) {
+              validation = validations[_i];
+              if (!(validation !== null)) {
+                continue;
+              }
+              if (validation.value !== null) {
+                data[validation.field.name] = validation.value;
+              }
+              if (!validation.success) {
+                aErrors.push(validation);
+              }
+            }
+            if (aErrors.length) {
+              error = _.first(aErrors);
+              _err = {
+                message: "this value already exists",
+                field: error.field.name,
+                data: error,
+                success: false
+              };
+              _this._generalReturnObject(error.type, callback, _err, null);
+            } else {
+              fn(data);
+            }
+          });
+        };
+      })(this);
       if (isUpdate && id) {
         useGet = _.isNumber(id) || _.isString(id);
-        this[useGet ? "get" : "find"](id, function(err, res) {
-          if (!err) {
-            return fnValidate(useGet ? res : res[0]);
-          } else {
-            return _this._generalReturnObject("notfound", callback, res, options.type);
-          }
-        });
+        this[useGet ? "get" : "find"](id, (function(_this) {
+          return function(err, res) {
+            if (!err) {
+              return fnValidate(useGet ? res : res[0]);
+            } else {
+              return _this._generalReturnObject("notfound", callback, res, options.type);
+            }
+          };
+        })(this));
       } else {
         fnValidate(null);
       }
     };
 
     Datamodel.prototype._validateField = function(field, value, oldValue, isUpdate, id, options, cba) {
-      var asyncCheck, asyncChecks, error, fnA, rule, rulename, salt, _i, _len, _m, _ref,
-        _this = this;
+      var asyncCheck, asyncChecks, error, fnA, rule, rulename, salt, _i, _len, _m, _ref;
       try {
         switch (field.type) {
           case "string":
@@ -663,38 +672,41 @@
           switch (asyncCheck) {
             case "allreadyExistend":
               fnA.push(_.bind(function(value, field, cba) {
-                var _filter,
-                  _this = this;
+                var _filter;
                 _filter = {};
                 _filter[field.name] = value;
-                this.count(_filter, function(err, cRet) {
-                  if (err) {
-                    cba(err);
-                  } else if (cRet.count > 0) {
-                    cba({
-                      value: value,
-                      success: false,
-                      field: field,
-                      type: "validation-already-existend"
-                    });
-                  } else {
-                    cba(null);
-                  }
-                });
+                this.count(_filter, (function(_this) {
+                  return function(err, cRet) {
+                    if (err) {
+                      cba(err);
+                    } else if (cRet.count > 0) {
+                      cba({
+                        value: value,
+                        success: false,
+                        field: field,
+                        type: "validation-already-existend"
+                      });
+                    } else {
+                      cba(null);
+                    }
+                  };
+                })(this));
               }, this, value, field));
           }
         }
-        async.parallel(fnA, function(err) {
-          if (err) {
-            cba(null, err);
-          } else {
-            cba(null, {
-              value: value,
-              success: true,
-              field: field
-            });
-          }
-        });
+        async.parallel(fnA, (function(_this) {
+          return function(err) {
+            if (err) {
+              cba(null, err);
+            } else {
+              cba(null, {
+                value: value,
+                success: true,
+                field: field
+              });
+            }
+          };
+        })(this));
       } else {
         cba(null, {
           value: value,
@@ -705,8 +717,7 @@
     };
 
     Datamodel.prototype._initFields = function() {
-      var field, fieldname, fieldsetname, relModel, relModelBase, relation, relfield, relfieldname, _i, _len, _ref, _ref1, _ref2, _results,
-        _this = this;
+      var field, fieldname, fieldsetname, relModel, relModelBase, relation, relfield, relfieldname, _i, _len, _ref, _ref1, _ref2, _results;
       if (this.useFieldsets) {
         this.fieldsets = {};
         _ref = this.fields;
@@ -736,58 +747,64 @@
         switch (relation.type) {
           case "rel_1":
             relModel = this.factory.get(relation.relModel);
-            _results.push(relation.get = function(id, callback) {
-              return _this.get(id, function(err, res) {
-                if (!err) {
-                  return relModel.get(res[relation.field], callback);
-                }
-              });
-            });
+            _results.push(relation.get = (function(_this) {
+              return function(id, callback) {
+                return _this.get(id, function(err, res) {
+                  if (!err) {
+                    return relModel.get(res[relation.field], callback);
+                  }
+                });
+              };
+            })(this));
             break;
           case "rel_n":
             relModel = this.factory.get(relation.relModel);
-            _results.push(relation.get = function(id, callback) {
-              var forignRel, oFilter;
-              forignRel = relModel._getRelation(relation.relation);
-              oFilter = {};
-              oFilter[forignRel.field] = id;
-              return relModel.find(oFilter, callback);
-            });
+            _results.push(relation.get = (function(_this) {
+              return function(id, callback) {
+                var forignRel, oFilter;
+                forignRel = relModel._getRelation(relation.relation);
+                oFilter = {};
+                oFilter[forignRel.field] = id;
+                return relModel.find(oFilter, callback);
+              };
+            })(this));
             break;
           case "rel_nm":
             relModelBase = this.factory.get(relation.relModel);
             _results.push((function() {
-              var _ref3, _results1,
-                _this = this;
+              var _ref3, _results1;
               _ref3 = relModelBase.settings.fields;
               _results1 = [];
               for (relfieldname in _ref3) {
                 relfield = _ref3[relfieldname];
                 if (relation.foreignfield === relfieldname) {
                   relModel = this.factory.get(relfield.relModel);
-                  relation.get = function(id, callback) {
-                    var oFilter;
-                    oFilter = {};
-                    oFilter[relfieldname] = {};
-                    oFilter[relfieldname].val = id;
-                    oFilter[relfieldname].reltable = relModelBase.settings.tablename;
-                    oFilter[relfieldname].foreignfield = relfield.foreignfield;
-                    relModel.find(oFilter, callback);
-                  };
+                  relation.get = (function(_this) {
+                    return function(id, callback) {
+                      var oFilter;
+                      oFilter = {};
+                      oFilter[relfieldname] = {};
+                      oFilter[relfieldname].val = id;
+                      oFilter[relfieldname].reltable = relModelBase.settings.tablename;
+                      oFilter[relfieldname].foreignfield = relfield.foreignfield;
+                      relModel.find(oFilter, callback);
+                    };
+                  })(this);
                   _results1.push(relation.set = _.bind(function(id, aData, callback) {
-                    var aSetfn, data, idx, val, _j, _len1,
-                      _this = this;
+                    var aSetfn, data, idx, val, _j, _len1;
                     aSetfn = [];
                     for (idx = _j = 0, _len1 = aData.length; _j < _len1; idx = ++_j) {
                       val = aData[idx];
                       data = {};
                       data[relfieldname] = val;
                       data[relfield.foreignfield] = id;
-                      aSetfn.push(function(cb) {
-                        relModelBase.set(data, function(err, res) {
-                          cb(err, res);
-                        });
-                      });
+                      aSetfn.push((function(_this) {
+                        return function(cb) {
+                          relModelBase.set(data, function(err, res) {
+                            cb(err, res);
+                          });
+                        };
+                      })(this));
                     }
                     async.parallel(aSetfn, callback);
                     return;
@@ -808,25 +825,25 @@
     };
 
     Datamodel.prototype._loadIDs = function() {
-      var _this = this;
       if (this.cachekey) {
-        return this.find({}, function(err, aData) {
-          var data, redMulti, _i, _len;
-          if (!err) {
-            redMulti = [];
-            for (_i = 0, _len = aData.length; _i < _len; _i++) {
-              data = aData[_i];
-              redMulti.push(["set", _this.cachekey + data[_this.sIdField], JSON.stringify(data)]);
+        return this.find({}, (function(_this) {
+          return function(err, aData) {
+            var data, redMulti, _i, _len;
+            if (!err) {
+              redMulti = [];
+              for (_i = 0, _len = aData.length; _i < _len; _i++) {
+                data = aData[_i];
+                redMulti.push(["set", _this.cachekey + data[_this.sIdField], JSON.stringify(data)]);
+              }
+              _this.redis.multi(redMulti).exec();
             }
-            _this.redis.multi(redMulti).exec();
-          }
-        });
+          };
+        })(this));
       }
     };
 
     Datamodel.prototype._generateNewID = function(id, callback) {
-      var sId,
-        _this = this;
+      var sId;
       if (arguments.length <= 1) {
         callback = id;
         id = null;
@@ -840,13 +857,15 @@
           sId = utils.randomString(5);
         }
       }
-      this.has(sId, function(err, res) {
-        if (!err && !res) {
-          return callback(sId);
-        } else {
-          return _this._generateNewID(callback);
-        }
-      });
+      this.has(sId, (function(_this) {
+        return function(err, res) {
+          if (!err && !res) {
+            return callback(sId);
+          } else {
+            return _this._generateNewID(callback);
+          }
+        };
+      })(this));
     };
 
     Datamodel.prototype._singleReturn = function(options, id, callback, err, result, meta) {

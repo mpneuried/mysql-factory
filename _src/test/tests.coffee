@@ -228,7 +228,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 				tbl.find query, ( err, items )=>
 					throw err if err
-					items.should.have.length(2)
+					items.should.have.length(3)
 					done()
 					return
 
@@ -539,7 +539,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update2" )
-					item.should.have.property('password').and.include( "$2a$10$" )
+					item.should.have.property('password').and.containEql( "$2a$10$" )
 
 					item.should.have.property('_u').and.equal( 2 )
 					item.should.have.property('_t').and.be.within( _saveUserT, +Infinity )
@@ -869,7 +869,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				tbl.count( filter, ( err, count )=>
 					throw err if err
 					should.exist( count )
-					count.should.equal( 2 )
+					count.should.equal( 3 )
 					done()
 					return
 				, {} )

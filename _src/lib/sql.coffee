@@ -41,6 +41,7 @@ module.exports = ( options, escape = mysql.escape )->
 			@_c.attrsArrayKeys or= []
 			@_c.fieldsets or= {}
 			@_c.fieldlist or= []
+			@_c.joins or= []
 
 			super( options )
 			return
@@ -81,6 +82,10 @@ module.exports = ( options, escape = mysql.escape )->
 
 			@getter( "where", @getWhere )
 
+			@getter( "joins", @getJoins )
+
+			@getter( "hasJoins", @hasJoins )
+
 			@getter( "isFiltered", @hasFilter )
 
 			@define( "defaultLimit", @getDefaultLimit, @setDefaultLimit )
@@ -104,7 +109,7 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		clone: =>
 			@log "debug", "run clone"
-			return new SQLBuilder( _.clone( @_c ) )
+			return new SQLBuilder( JSON.parse( JSON.stringify( @_c ) ) )
 
 		###
 		## insert
@@ -182,6 +187,8 @@ module.exports = ( options, escape = mysql.escape )->
 			statement = []
 			statement.push "SELECT #{ @fields }"
 			statement.push "FROM #{ @table }"
+			if @hasJoins?
+				statement.push "#{ @joins }"
 
 			statement.push @where
 
@@ -263,7 +270,7 @@ module.exports = ( options, escape = mysql.escape )->
 					return @
 
 				# create the SQL where statement
-				_filter = "#{ key } "
+				_filter = "#{@table}.#{ key } "
 
 				if pred is null
 					# is null if pred is `null`
@@ -331,6 +338,19 @@ module.exports = ( options, escape = mysql.escape )->
 				@_c._filterCombine = null
 
 			@
+
+		addJoin: ( type, field, fSqlBuilder, fField, fFilters )=>
+			#console.log @table, type, field, fSqlBuilder.table, fField, fFilters
+			@_c.filters or= []
+			@_c.joins.push 
+				type: type
+				field: field
+				table: fSqlBuilder.table
+				foreignField: fField
+			
+			if fFilters? and not _.isEmpty( fFilters )
+				@_c.filters = @_c.filters.concat( fSqlBuilder.filter( fFilters ).getFilters() )
+			return @
 
 		###
 		## or
@@ -694,9 +714,9 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		getOrderBy: =>
 			if @forward
-				"ORDER BY #{ @orderfield } ASC"
+				"ORDER BY #{@table}.#{ @orderfield } ASC"
 			else
-				"ORDER BY #{ @orderfield } DESC"
+				"ORDER BY #{@table}.#{ @orderfield } DESC"
 
 		###
 		## getWhere
@@ -709,12 +729,15 @@ module.exports = ( options, escape = mysql.escape )->
 		
 		@api private
 		###
-		getWhere: =>
+		getWhere: ( withWhere = true )=>
 			_filters = @_c.filters or []
 			if _filters.length
 				
 				@filterGroup( false )
-				"WHERE #{ _filters.join( "\n" ) }"
+				if withWhere
+					"WHERE #{ _filters.join( "\n" ) }"
+				else
+					 _filters.join( "\n" )
 			else
 				null
 
@@ -762,7 +785,13 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		getFields: =>
 			if @_c.fields?.length
-				@_c.fields.join( ", " )
+				_fdls = []
+				for field in @_c.fields
+					if field.indexOf( " " ) < 0
+						_fdls.push( "#{@table}.#{field}" )
+					else
+						_fdls.push( field )
+				_fdls.join( ", " )
 			else
 				"*"
 
@@ -779,7 +808,7 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		getFieldNames: =>
 			if @_c.fields?.length
-				@_c.fields
+				_.clone( @_c.fields )
 			else
 				[]
 
@@ -894,6 +923,18 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		hasFilter: =>
 			return @_c.filters.length > 0
+
+		getFilters: =>
+			return @_c.filters
+
+		hasJoins: =>
+			return @_c.joins.length > 0
+
+		getJoins: =>
+			_joins = []
+			for _jn in @_c.joins
+				_joins.push "#{_jn.type.toUpperCase()} JOIN #{_jn.table} ON #{@table}.#{_jn.field} = #{_jn.table}.#{_jn.foreignField}"
+			return _joins.join( "\n" )
 
 	# # Private methods 
 

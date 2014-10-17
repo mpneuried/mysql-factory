@@ -31,7 +31,7 @@ module.exports = (grunt) ->
 				reporter: "spec"
 				bail: false
 				timeout: 3000
-				slow: 1
+				slow: 3
 
 			main: [ "test/general.js" ]
 			#old: [ "test/old.js" ]

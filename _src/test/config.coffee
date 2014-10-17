@@ -51,6 +51,8 @@ module.exports  =
 				firstname: "Maxi"
 				role: "TRAINER"
 
+		contractsTable: "Contracts"
+
 		tokenTable: "Tokens"
 		insertTestToken:
 			user_id: "Dwrpf"

@@ -10,6 +10,8 @@ utils = require( "./utils" )
 # # MySQL Dynamo Table
 # ### extends [Basic](basic.coffee.html)
 
+_joinTypes = [ "inner", "left outer", "right outer" ]
+
 # Work with the data of a table
 module.exports = class MySQLTable extends require( "./basic" )
 
@@ -177,6 +179,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 			if options.offset?
 				sql.offset = options.offset
 
+		if options.joins?
+			for jField, jSett of options.joins
+				if not @_addJoin( sql, jField, jSett, cb )
+					return
+		
+
 		sql.filter( filter )
 
 		if options._customQueryFilter?
@@ -189,6 +197,48 @@ module.exports = class MySQLTable extends require( "./basic" )
 		@factory.exec( sql.select(), @_handleList( "mget", filter, opt, sql, cb ) )
 
 		return
+
+	_addJoin: ( sql, ownField, jSett, cb )=>
+		_.defaults jSett,
+			type: "inner"
+			table: null
+			field: null
+			filter: null
+
+		if not sql.hasField( ownField )
+			@_handleError( cb, "invalid-join-field", { self: @tablename, field: ownField } )
+			return false
+
+		if not ownField? and ownField not in sql.fieldNames
+			@_handleError( cb, "missing-join-key", {  self: @tablename, field: ownField } )
+			return false
+
+		if not jSett.table?
+			@_handleError( cb, "missing-join-table", { self: @tablename } )
+			return false
+		else if jSett.table not instanceof MySQLTable
+			_table = @factory.get( jSett.table )
+			if not _table?
+				@_handleError( cb, "invalid-join-table", { self: @tablename, foreign: jSett.table } )
+				return false
+			jSett.table = _table
+
+		if jSett.type.toLowerCase() not in _joinTypes
+			@_handleError( cb, "invalid-join-type", { self: @tablename, foreign: jSett.table?.tablename } )
+			return false
+
+		jSql = jSett.table.builder.clone()
+		
+
+		if not jSett.field?
+			jSett.field = jSql.idField
+
+		if not jSql.hasField( jSett.field )
+			@_handleError( cb, "invalid-join-foreignfield", { self: @tablename, foreign: jSql.table, field: jSett.field } )
+			return false
+
+		sql.addJoin( jSett.type, ownField, jSql, jSett.field, jSett.filter )
+		return true
 
 	set: ( id, data, cb, options )=>
 
@@ -362,8 +412,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 			return
 
 		sql.filter( @sIdField, id )
-
-		sql.setFields( "#{sql.fields}, #{ field } AS count", true )
+		_fields = sql.fieldNames
+		_fields.push( "#{ field } AS count" )
+		
+		sql.setFields( _fields, true )
 
 		_data = {}
 		_data[ field ] = "crmt" + count
@@ -693,3 +745,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 			"validation-already-existend": "The value `<%= value %>` for field `<%= field %>` already exists."
 			"invalid-field": "The field `<%= field %>` is not defined for the method `<%= method %>`"
 			"no-filter": "You have to define at least one valid filter"
+			"invalid-join-type": "You have to use a join type of `#{_joinTypes.join( "`, `" )}`"
+			"invalid-join-field": "You have to define a vailid field `<%= field %>` of the table `<%= self %>`"
+			"invalid-join-foreignfield": "You have to define a vailid field `<%= field %>` of the table `<%= foreign %>` to join the table `<%= self %>`"
+			"missing-join-table": "You have to define a foreign table joining this table `<%= self %>`"
+			"invalid-join-table": "You have to define a existing foreign table `<%= foreign %>` as string or MySQLTable instance to join to this table `<%= self %>`"
+
+

@@ -478,6 +478,8 @@ module.exports = ( options, escape = mysql.escape )->
 							return parseInt( value, 10 )
 
 						when "date", "D"
+							if value is "0000-00-00" # handle special date case if the date is 0 return as not defined
+							 	return null
 							if _.isDate( value )
 								return value
 							else

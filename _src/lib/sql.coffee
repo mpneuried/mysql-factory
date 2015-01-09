@@ -22,6 +22,8 @@ module.exports = ( options, escape = mysql.escape )->
 				limit: 1000
 				# **standardFilterCombine** *String* Standard where expression
 				standardFilterCombine: "AND"
+				# **dateFormats** *String[]* An Array of date formats for date parsing
+				dateFormats: [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mm:ssZZ",  "YYYY-MM-DD HH:mm:ss.SSSZZ" ]
 
 		###	
 		## constructor 
@@ -281,6 +283,9 @@ module.exports = ( options, escape = mysql.escape )->
 				else if _.isArray( pred )
 					# simple `in (  )` filter
 					_filter += "in ( #{ escape( pred ) })"
+				else if _.isDate( pred )
+					# simple date filter
+					_filter += "=  #{ escape( pred.toString() ) }"
 				else
 					# complex predicate filter
 					_operand = Object.keys( pred )[ 0 ]
@@ -483,7 +488,7 @@ module.exports = ( options, escape = mysql.escape )->
 							if _.isDate( value )
 								return value
 							else
-								return moment( value, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] ).toDate()
+								return moment( value, @config.dateFormats ).toDate()
 
 						when "array", "A"
 							return setToArray( value )
@@ -1001,7 +1006,7 @@ module.exports = ( options, escape = mysql.escape )->
 			# loop through all attributes
 			for _key, _val of attributes
 				_cnf = @_getAttrConfig( _key )
-				if _cnf
+				if _cnf and not _cnf.readonly
 					switch _cnf.type
 						when "string", "S"
 							if _val? and not _.isString( _val )
@@ -1061,7 +1066,7 @@ module.exports = ( options, escape = mysql.escape )->
 							else if _.isDate( _val )
 								_vals.push( Math.round( _val.getTime() ) )
 							else if _.isString( _val )
-								_d = moment( _val, _cnf.dateFormat or [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] )
+								_d = moment( _val, _cnf.dateFormat or @config.dateFormats )
 								_vals.push( _d.valueOf() )
 							else if _.isNumber( _val )
 								# convert s timestamp to ms
@@ -1079,7 +1084,7 @@ module.exports = ( options, escape = mysql.escape )->
 							else if _.isDate( _val )
 								_vals.push( Math.round( _val.getTime() / 1000 ) )
 							else if _.isString( _val )
-								_d = moment( _val, _cnf.dateFormat or [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] )
+								_d = moment( _val, _cnf.dateFormat or @config.dateFormats )
 								_vals.push( _d.unix() )
 							else if _.isNumber( _val )
 								# convert ms timestamp to s
@@ -1099,7 +1104,7 @@ module.exports = ( options, escape = mysql.escape )->
 							if _.isDate( _val )
 								_vals.push( escape( _val ) )
 								_keys.push( _key )
-							else if _.isDate( ( _m = moment( _val, [ "YYYY-MM-DD", "DD.MM.YYYY", "YYYY-MM-DD HH:mm", "YYYY-MM-DD HH:mmZZ" ] ) )?._d )
+							else if _.isDate( ( _m = moment( _val, @config.dateFormats ) )?._d )
 								_vals.push( escape( _m.format( "YYYY-MM-DD HH:mm" ) ) )
 								_keys.push( _key )
 

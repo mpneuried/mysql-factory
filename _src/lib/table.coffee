@@ -535,6 +535,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 					@_handleError( cb, "validation-notequal-required", field: field.name )
 					return
 				# add a filter for the equal test. On return there has to be a check to detect the error based on the returning data.
+				if field.type in [ "D", "date" ] and _.isString( value )
+					value  = moment( value, sql.config.dateFormats ).format( "YYYY-MM-DD HH:mm:ss" )
 				sql.filter( field.name, value )
 				options._afterSave[ field.name ].checkEqualOld = true
 

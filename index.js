@@ -1,5 +1,5 @@
 (function() {
-  exports.version = '0.2.4';
+  exports.version = '0.2.5';
 
   exports.getSqlBuilder = require('./lib/sql');
 

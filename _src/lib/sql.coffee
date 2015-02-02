@@ -23,7 +23,7 @@ module.exports = ( options, escape = mysql.escape )->
 				# **standardFilterCombine** *String* Standard where expression
 				standardFilterCombine: "AND"
 				# **dateFormats** *String[]* An Array of date formats for date parsing
-				dateFormats: [ "YYYY-MM-DD HH:mm:ss.SSSZZ", "YYYY-MM-DD HH:mm:ssZZ", "YYYY-MM-DD HH:mm", "DD.MM.YYYY", "YYYY-MM-DD" ]
+				dateFormats: [ "YYYY-MM-DD HH:mm:ss.SSSZZ", "YYYY-MM-DD HH:mm:ssZZ", "YYYY-MM-DD HH:mm:ss", "YYYY-MM-DD HH:mm", "DD.MM.YYYY", "YYYY-MM-DD" ]
 
 		###	
 		## constructor 

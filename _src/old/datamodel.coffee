@@ -13,7 +13,6 @@ sys = require( "sys" )
 async = require( "async" )
 moment = require('moment')
 _ = require('lodash')._
-_.string = require("underscore.string")
 EventEmitter = require( "events" ).EventEmitter
 
 utils = require( "../lib/utils" )
@@ -809,7 +808,7 @@ class Datamodel extends EventEmitter
 					result = 
 						count: 0 
 
-				if _.string.include( options.type, "crement" )
+				if options.type.indexOf( "crement" ) >= 0
 					result = 
 						version: result.count
 						column: options.column
@@ -1033,7 +1032,7 @@ class Datamodel extends EventEmitter
 		if fnFilter and _.isFunction( fnFilter )
 			_.pluck( _.filter(@fields, fnFilter ), "name" )
 		else
-			if @useFieldsets and _.isString( fnFilter ) and _.string.startsWith( fnFilter, "set:" )
+			if @useFieldsets and _.isString( fnFilter ) and fnFilter[..3] is "set:"
 				setName = fnFilter.replace( "set:", "" )
 				if @fieldsets[ setName ]?
 					@fieldsets[ setName ]

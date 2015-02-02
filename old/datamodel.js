@@ -12,8 +12,6 @@
 
   _ = require('lodash')._;
 
-  _.string = require("underscore.string");
-
   EventEmitter = require("events").EventEmitter;
 
   utils = require("../lib/utils");
@@ -931,7 +929,7 @@
               count: 0
             };
           }
-          if (_.string.include(options.type, "crement")) {
+          if (options.type.indexOf("crement") >= 0) {
             result = {
               version: result.count,
               column: options.column,
@@ -1239,7 +1237,7 @@
       if (fnFilter && _.isFunction(fnFilter)) {
         return _.pluck(_.filter(this.fields, fnFilter), "name");
       } else {
-        if (this.useFieldsets && _.isString(fnFilter) && _.string.startsWith(fnFilter, "set:")) {
+        if (this.useFieldsets && _.isString(fnFilter) && fnFilter.slice(0, 4) === "set:") {
           setName = fnFilter.replace("set:", "");
           if (this.fieldsets[setName] != null) {
             return this.fieldsets[setName];

@@ -537,10 +537,14 @@ module.exports = class MySQLTable extends require( "./basic" )
 				# add a filter for the equal test. On return there has to be a check to detect the error based on the returning data.
 				if field.type in [ "D", "date" ]
 					if _.isString( value )
-						value = moment( value, sql.config.dateFormats ).format( "YYYY-MM-DD HH:mm:ss" )
+						_date = moment( value, sql.config.dateFormats )
 					else if _.isDate( value ) or _.isNumber( value )
-						value = moment( value ).format( "YYYY-MM-DD HH:mm:ss" )
-						
+						_date = moment( value )
+
+					if _date? and not isNaN( parseInt(@config?.factory?.config?.timezone, 10 ))
+						value = _date.utcOffset(  @config.factory.config.timezone ).format("YYYY-MM-DD HH:mm:ss")
+					else if _date?
+						value = _date.format("YYYY-MM-DD HH:mm:ss")
 				sql.filter( field.name, value )
 				options._afterSave[ field.name ].checkEqualOld = true
 

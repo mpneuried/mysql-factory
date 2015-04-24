@@ -1,8 +1,8 @@
 (function() {
-  var AuthenticationFailed, DBConnector, EventEmitter, SetupFailed, sys, utils, _,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  var AuthenticationFailed, DBConnector, EventEmitter, SetupFailed, _, sys, utils,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
 
   sys = require("sys");
 
@@ -12,12 +12,12 @@
 
   utils = require("../lib/utils");
 
-  DBConnector = (function(_super) {
-    __extends(DBConnector, _super);
+  DBConnector = (function(superClass) {
+    extend(DBConnector, superClass);
 
     function DBConnector(settings) {
-      this.query = __bind(this.query, this);
-      var mySQLClient, _ref;
+      this.query = bind(this.query, this);
+      var mySQLClient, ref;
       this.user = settings.user || null;
       this.password = settings.password || null;
       this.host = settings.host || "localhost";
@@ -25,7 +25,7 @@
       this.database = settings.database || null;
       this.disconnectAfterQuery = false;
       this.logLevel = 0;
-      this.type = (_ref = settings.type) != null ? _ref : "mysql";
+      this.type = (ref = settings.type) != null ? ref : "mysql";
       this.runningQuerys = 0;
       this.runningConnections = 0;
       switch (this.type) {
@@ -163,9 +163,9 @@
 
     DBConnector.prototype._log = function(lvl, type, args) {
       if (lvl === 1 && this.logLevel >= lvl) {
-        console.log("DBConnector-ERROR: ", this.runningConnections, this.runningQuerys, type, args != null ? args :  null);
+        console.log("DBConnector-ERROR: ", this.runningConnections, this.runningQuerys, type, args != null ? args : null);
       } else if (lvl === 2 && this.logLevel >= lvl) {
-        console.log("DBConnector-INFO: ", this.runningConnections, this.runningQuerys, type, args != null ? args :  null);
+        console.log("DBConnector-INFO: ", this.runningConnections, this.runningQuerys, type, args != null ? args : null);
       }
     };
 

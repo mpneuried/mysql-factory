@@ -1,5 +1,5 @@
 (function() {
-  var Datamodel, INITTREE, Modelfactory, async, moment, utils, _, _arrayInclude, _arrayRemove;
+  var Datamodel, INITTREE, Modelfactory, _, _arrayInclude, _arrayRemove, async, moment, utils;
 
   Datamodel = require('./datamodel').Datamodel;
 
@@ -12,13 +12,13 @@
   utils = require("../lib/utils");
 
   _arrayInclude = function(arrBase, arrAdd) {
-    var aEl, _i, _len;
+    var aEl, i, len;
     if (!_.isArray(arrAdd)) {
       arrAdd = [arrAdd];
     }
     if (arrAdd) {
-      for (_i = 0, _len = arrAdd.length; _i < _len; _i++) {
-        aEl = arrAdd[_i];
+      for (i = 0, len = arrAdd.length; i < len; i++) {
+        aEl = arrAdd[i];
         if (_.indexOf(arrBase, aEl) < 0) {
           arrBase.push(aEl);
         }
@@ -28,15 +28,15 @@
   };
 
   _arrayRemove = function(arr, val) {
-    var part, _i, _len, _results;
-    _results = [];
-    for (_i = 0, _len = arr.length; _i < _len; _i++) {
-      part = arr[_i];
+    var i, len, part, results;
+    results = [];
+    for (i = 0, len = arr.length; i < len; i++) {
+      part = arr[i];
       if (part !== val) {
-        _results.push(part);
+        results.push(part);
       }
     }
-    return _results;
+    return results;
   };
 
   module.exports = Modelfactory = (function() {
@@ -49,21 +49,21 @@
     }
 
     Modelfactory.prototype._initModels = function() {
-      var event, events, fn, modeldata, modelname, _i, _len, _ref, _ref1, _ref2;
-      _ref = this.datamodels;
-      for (modelname in _ref) {
-        modeldata = _ref[modelname];
+      var event, events, fn, i, len, modeldata, modelname, ref, ref1, ref2;
+      ref = this.datamodels;
+      for (modelname in ref) {
+        modeldata = ref[modelname];
         this.models[modelname] = new Datamodel(_.extend(modeldata, {
           connector: this.connector,
           factory: this,
           autoinit: false
         }));
-        _ref1 = modeldata.events;
-        for (events in _ref1) {
-          fn = _ref1[events];
-          _ref2 = events.split(',');
-          for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-            event = _ref2[_i];
+        ref1 = modeldata.events;
+        for (events in ref1) {
+          fn = ref1[events];
+          ref2 = events.split(',');
+          for (i = 0, len = ref2.length; i < len; i++) {
+            event = ref2[i];
             this.models[modelname].on(event, _.bind(fn, this.models[modelname], event));
           }
         }
@@ -88,8 +88,8 @@
     };
 
     Modelfactory.prototype.has = function(modelname) {
-      var _ref;
-      return (_ref = this.models[modelname]) != null ? _ref : true;
+      var ref;
+      return (ref = this.models[modelname]) != null ? ref : true;
     };
 
     return Modelfactory;

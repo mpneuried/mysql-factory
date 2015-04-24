@@ -33,6 +33,8 @@ module.exports = class MySQLFactory extends require( "./basic" )
 			connectionLimit: 10
 			# **connectionLimit** *Number* MySQL maximim limit of queued querys if the poolsize has been reached. `0` = no limit
 			queueLimit: 0
+			# **timezone** *String|Number* MySQL tiemzone definition
+			timezone: "local"
 
 	###	
 	## constructor 

@@ -1,8 +1,8 @@
 (function() {
-  var Datamodel, EventEmitter, async, bcrypt, moment, redisHashPrefix, sys, utils, _, _timestampField,
-    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
-    __hasProp = {}.hasOwnProperty,
-    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+  var Datamodel, EventEmitter, _, _timestampField, async, bcrypt, moment, redisHashPrefix, sys, utils,
+    bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
+    extend = function(child, parent) { for (var key in parent) { if (hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
+    hasProp = {}.hasOwnProperty;
 
   sys = require("sys");
 
@@ -22,8 +22,8 @@
 
   _timestampField = "_t";
 
-  Datamodel = (function(_super) {
-    __extends(Datamodel, _super);
+  Datamodel = (function(superClass) {
+    extend(Datamodel, superClass);
 
     Datamodel.prototype.tablename = "tablename";
 
@@ -44,14 +44,14 @@
     };
 
     function Datamodel(settings) {
-      this._getLimiterStatement = __bind(this._getLimiterStatement, this);
-      this._getSorting = __bind(this._getSorting, this);
-      this._reduceSortFields = __bind(this._reduceSortFields, this);
-      this._postProcessField = __bind(this._postProcessField, this);
-      this._postProcess = __bind(this._postProcess, this);
-      this._generalReturnObject = __bind(this._generalReturnObject, this);
-      this._generateReturnObject = __bind(this._generateReturnObject, this);
-      this._generalReturn = __bind(this._generalReturn, this);
+      this._getLimiterStatement = bind(this._getLimiterStatement, this);
+      this._getSorting = bind(this._getSorting, this);
+      this._reduceSortFields = bind(this._reduceSortFields, this);
+      this._postProcessField = bind(this._postProcessField, this);
+      this._postProcess = bind(this._postProcess, this);
+      this._generalReturnObject = bind(this._generalReturnObject, this);
+      this._generateReturnObject = bind(this._generateReturnObject, this);
+      this._generalReturn = bind(this._generalReturn, this);
       this.settings = settings;
       this.init();
     }
@@ -275,7 +275,7 @@
             return _this.connector.query(sStatement, args, _.bind(_this._setReturn, _this, options, filter, callback));
           } else {
             fnInsert = function(data) {
-              var aDataKeys, aRelDataKeys, fnSeriesCall, fnSet, idKey, idx, relkey, _i, _len;
+              var aDataKeys, aRelDataKeys, fnSeriesCall, fnSet, i, idKey, idx, len, relkey;
               aDataKeys = _.keys(data);
               aRelDataKeys = _.intersection(aRelationKeys, aDataKeys);
               if (_.isArray(_this.sIdField)) {
@@ -302,7 +302,7 @@
                     return cb(err, res);
                   }));
                 };
-                for (idx = _i = 0, _len = aRelDataKeys.length; _i < _len; idx = ++_i) {
+                for (idx = i = 0, len = aRelDataKeys.length; i < len; idx = ++i) {
                   relkey = aRelDataKeys[idx];
                   if (_this._hasRelation(relkey)) {
                     fnSet = _this._getRelation(relkey).set;
@@ -496,21 +496,21 @@
       var fnValidate, useGet;
       fnValidate = (function(_this) {
         return function(oldData) {
-          var aCheckFns, aErrors, field, fieldname, _ref;
+          var aCheckFns, aErrors, field, fieldname, ref;
           if (oldData == null) {
             oldData = {};
           }
           aErrors = [];
           aCheckFns = [];
-          _ref = _this.fields;
-          for (fieldname in _ref) {
-            field = _ref[fieldname];
+          ref = _this.fields;
+          for (fieldname in ref) {
+            field = ref[fieldname];
             aCheckFns.push(_.bind(_this._validateField, _this, field, (data && data[fieldname] !== void 0 ? data[fieldname] : null), (isUpdate && oldData && oldData[fieldname] !== void 0 ? oldData[fieldname] : null), isUpdate, id, options));
           }
           async.parallel(aCheckFns, function(err, validations) {
-            var error, validation, _err, _i, _len;
-            for (_i = 0, _len = validations.length; _i < _len; _i++) {
-              validation = validations[_i];
+            var _err, error, i, len, validation;
+            for (i = 0, len = validations.length; i < len; i++) {
+              validation = validations[i];
               if (!(validation !== null)) {
                 continue;
               }
@@ -553,7 +553,7 @@
     };
 
     Datamodel.prototype._validateField = function(field, value, oldValue, isUpdate, id, options, cba) {
-      var asyncCheck, asyncChecks, error, fnA, rule, rulename, salt, _i, _len, _m, _ref;
+      var _m, asyncCheck, asyncChecks, error, fnA, i, len, ref, rule, rulename, salt;
       try {
         switch (field.type) {
           case "string":
@@ -607,9 +607,9 @@
         error = _error;
       }
       asyncChecks = [];
-      _ref = field.validation;
-      for (rulename in _ref) {
-        rule = _ref[rulename];
+      ref = field.validation;
+      for (rulename in ref) {
+        rule = ref[rulename];
         if (rulename === "isRequired" && rule && value === void 0) {
           cba(null, {
             value: value,
@@ -665,8 +665,8 @@
       }
       if (asyncChecks.length) {
         fnA = [];
-        for (_i = 0, _len = asyncChecks.length; _i < _len; _i++) {
-          asyncCheck = asyncChecks[_i];
+        for (i = 0, len = asyncChecks.length; i < len; i++) {
+          asyncCheck = asyncChecks[i];
           switch (asyncCheck) {
             case "allreadyExistend":
               fnA.push(_.bind(function(value, field, cba) {
@@ -715,16 +715,16 @@
     };
 
     Datamodel.prototype._initFields = function() {
-      var field, fieldname, fieldsetname, relModel, relModelBase, relation, relfield, relfieldname, _i, _len, _ref, _ref1, _ref2, _results;
+      var field, fieldname, fieldsetname, i, len, ref, ref1, ref2, relModel, relModelBase, relation, relfield, relfieldname, results;
       if (this.useFieldsets) {
         this.fieldsets = {};
-        _ref = this.fields;
-        for (fieldname in _ref) {
-          field = _ref[fieldname];
+        ref = this.fields;
+        for (fieldname in ref) {
+          field = ref[fieldname];
           if (field.fieldsets) {
-            _ref1 = field.fieldsets;
-            for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-              fieldsetname = _ref1[_i];
+            ref1 = field.fieldsets;
+            for (i = 0, len = ref1.length; i < len; i++) {
+              fieldsetname = ref1[i];
               if (this.fieldsets[fieldsetname] == null) {
                 this.fieldsets[fieldsetname] = [];
               }
@@ -735,17 +735,17 @@
       } else {
         this.fieldsets = null;
       }
-      _ref2 = this.relations;
-      _results = [];
-      for (fieldname in _ref2) {
-        relation = _ref2[fieldname];
+      ref2 = this.relations;
+      results = [];
+      for (fieldname in ref2) {
+        relation = ref2[fieldname];
         relModel = null;
         relation.get = null;
         relation.set = null;
         switch (relation.type) {
           case "rel_1":
             relModel = this.factory.get(relation.relModel);
-            _results.push(relation.get = (function(_this) {
+            results.push(relation.get = (function(_this) {
               return function(id, callback) {
                 return _this.get(id, function(err, res) {
                   if (!err) {
@@ -757,7 +757,7 @@
             break;
           case "rel_n":
             relModel = this.factory.get(relation.relModel);
-            _results.push(relation.get = (function(_this) {
+            results.push(relation.get = (function(_this) {
               return function(id, callback) {
                 var forignRel, oFilter;
                 forignRel = relModel._getRelation(relation.relation);
@@ -769,12 +769,12 @@
             break;
           case "rel_nm":
             relModelBase = this.factory.get(relation.relModel);
-            _results.push((function() {
-              var _ref3, _results1;
-              _ref3 = relModelBase.settings.fields;
-              _results1 = [];
-              for (relfieldname in _ref3) {
-                relfield = _ref3[relfieldname];
+            results.push((function() {
+              var ref3, results1;
+              ref3 = relModelBase.settings.fields;
+              results1 = [];
+              for (relfieldname in ref3) {
+                relfield = ref3[relfieldname];
                 if (relation.foreignfield === relfieldname) {
                   relModel = this.factory.get(relfield.relModel);
                   relation.get = (function(_this) {
@@ -788,10 +788,10 @@
                       relModel.find(oFilter, callback);
                     };
                   })(this);
-                  _results1.push(relation.set = _.bind(function(id, aData, callback) {
-                    var aSetfn, data, idx, val, _j, _len1;
+                  results1.push(relation.set = _.bind(function(id, aData, callback) {
+                    var aSetfn, data, idx, j, len1, val;
                     aSetfn = [];
-                    for (idx = _j = 0, _len1 = aData.length; _j < _len1; idx = ++_j) {
+                    for (idx = j = 0, len1 = aData.length; j < len1; idx = ++j) {
                       val = aData[idx];
                       data = {};
                       data[relfieldname] = val;
@@ -809,28 +809,28 @@
                     return this;
                   }));
                 } else {
-                  _results1.push(void 0);
+                  results1.push(void 0);
                 }
               }
-              return _results1;
+              return results1;
             }).call(this));
             break;
           default:
-            _results.push(void 0);
+            results.push(void 0);
         }
       }
-      return _results;
+      return results;
     };
 
     Datamodel.prototype._loadIDs = function() {
       if (this.cachekey) {
         return this.find({}, (function(_this) {
           return function(err, aData) {
-            var data, redMulti, _i, _len;
+            var data, i, len, redMulti;
             if (!err) {
               redMulti = [];
-              for (_i = 0, _len = aData.length; _i < _len; _i++) {
-                data = aData[_i];
+              for (i = 0, len = aData.length; i < len; i++) {
+                data = aData[i];
                 redMulti.push(["set", _this.cachekey + data[_this.sIdField], JSON.stringify(data)]);
               }
               _this.redis.multi(redMulti).exec();
@@ -885,22 +885,22 @@
     };
 
     Datamodel.prototype._multiReturn = function(options, id, callback, err, result, meta) {
-      var idx, resHelp, val, _i, _j, _k, _len, _len1, _len2;
+      var i, idx, j, k, len, len1, len2, resHelp, val;
       if (!err) {
-        for (idx = _i = 0, _len = result.length; _i < _len; idx = ++_i) {
+        for (idx = i = 0, len = result.length; i < len; idx = ++i) {
           val = result[idx];
           val = this._postProcess(val);
         }
         if (this.cachekey && result && result.length && options.fields === "all") {
-          for (idx = _j = 0, _len1 = result.length; _j < _len1; idx = ++_j) {
+          for (idx = j = 0, len1 = result.length; j < len1; idx = ++j) {
             val = result[idx];
             this.redis.set(this.cachekey + val[this.sIdField], JSON.stringify(val));
           }
         }
         if (result !== null && options.fields === "idonly") {
           resHelp = [];
-          for (_k = 0, _len2 = result.length; _k < _len2; _k++) {
-            val = result[_k];
+          for (k = 0, len2 = result.length; k < len2; k++) {
+            val = result[k];
             resHelp.push(val[this.sIdField]);
           }
           result = resHelp;
@@ -913,7 +913,7 @@
     };
 
     Datamodel.prototype._countReturn = function(options, id, callback, err, result, meta) {
-      var _ref;
+      var ref;
       if (!err) {
         if (options.type === "has") {
           if (result && result.length && result[0].count > 0) {
@@ -937,7 +937,7 @@
             };
           }
         }
-        result = this._generateReturnObject((_ref = result === null) != null ? _ref : {
+        result = this._generateReturnObject((ref = result === null) != null ? ref : {
           "notfound": 0
         }, result);
         this._generalReturn(callback, result, options.type);
@@ -977,14 +977,14 @@
     };
 
     Datamodel.prototype._delReturn = function(options, filter, callback, err, result, meta) {
-      var args, sId, _i, _len, _ref;
+      var args, i, len, ref, sId;
       if (!err) {
         if (meta.affectedRows >= 1) {
           args = [];
           if (_.isArray(filter[this.sIdField])) {
-            _ref = filter[this.sIdField];
-            for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-              sId = _ref[_i];
+            ref = filter[this.sIdField];
+            for (i = 0, len = ref.length; i < len; i++) {
+              sId = ref[i];
               args.push(this.cachekey + sId.replace(/"/g, ""));
             }
           } else {
@@ -1001,7 +1001,7 @@
     };
 
     Datamodel.prototype._generalReturn = function(callback, result, type) {
-      var err, _ref;
+      var err, ref;
       err = null;
       if (!result.success) {
         err = {
@@ -1009,7 +1009,7 @@
           msg: result.msg,
           data: result.data
         };
-        if (((_ref = result.data) != null ? _ref.field : void 0) != null) {
+        if (((ref = result.data) != null ? ref.field : void 0) != null) {
           err.field = result.data.field;
         }
       }
@@ -1047,16 +1047,16 @@
     };
 
     Datamodel.prototype._postProcess = function(result) {
-      var field, fieldname, resultEl, _i, _len, _ref;
+      var field, fieldname, i, len, ref, resultEl;
       if (_.isArray(result)) {
-        for (_i = 0, _len = result.length; _i < _len; _i++) {
-          resultEl = result[_i];
+        for (i = 0, len = result.length; i < len; i++) {
+          resultEl = result[i];
           this._postProcess(resultEl);
         }
       } else {
-        _ref = this.fields;
-        for (fieldname in _ref) {
-          field = _ref[fieldname];
+        ref = this.fields;
+        for (fieldname in ref) {
+          field = ref[fieldname];
           if (result && result[fieldname]) {
             result[fieldname] = this._postProcessField(field, result[fieldname]);
           }
@@ -1123,7 +1123,7 @@
             oReturn.filter += "AND " + field + " ";
           }
           if (_.isObject(val) && (val.val != null) && (val.operator != null)) {
-            oReturn.filter += "" + val.operator + " ? ";
+            oReturn.filter += val.operator + " ? ";
             oReturn.args.push(val.val);
           } else if (_.isArray(val)) {
             oReturn.filter += "IN (?) ";
@@ -1141,7 +1141,7 @@
     };
 
     Datamodel.prototype._generateSearchFilter = function(term, args, isFirstWhere) {
-      var aSearchFields, field, oReturn, _i, _len;
+      var aSearchFields, field, i, len, oReturn;
       if (args == null) {
         args = [];
       }
@@ -1155,8 +1155,8 @@
       aSearchFields = this._getFields(function(field) {
         return !!field.search;
       });
-      for (_i = 0, _len = aSearchFields.length; _i < _len; _i++) {
-        field = aSearchFields[_i];
+      for (i = 0, len = aSearchFields.length; i < len; i++) {
+        field = aSearchFields[i];
         if (isFirstWhere) {
           oReturn.filter += "WHERE " + field.name + " ";
           isFirstWhere = false;

@@ -18,7 +18,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 	# define the defaults
 	defaults: =>
 		# extend the parent defaults
-		@extend super, 
+		@extend super,
 			tablename: null
 			# name of id-field
 			sIdField: "id"
@@ -46,7 +46,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 	@param {Object} options Basic config object
 
 	###
-	constructor: ( @settings, options )->	
+	constructor: ( @settings, options )->
 		
 		# set internal values
 		@factory = options.factory
@@ -192,7 +192,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		if options._customQueryEnd?
 			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
-			return 
+			return
 
 		@factory.exec( sql.select(), @_handleList( "mget", filter, opt, sql, cb ) )
 
@@ -247,7 +247,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 		aL = arguments.length
 		switch aL
 			when 4 then @update( id, data, cb, options )
-			when 3 
+			when 3
 				if _.isFunction( data )
 					# id = data; data = cb; cb = options
 					@insert( id, data, cb )
@@ -266,7 +266,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql = @builder.clone()
 
-		_valData = 
+		_valData =
 			isUpdate: true
 			id: id
 			data: data
@@ -329,7 +329,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		if options._customQueryEnd?
 			@_handleError( cb, "deprecated-option", key: "_customQueryEnd" )
-			return 
+			return
 
 		if options._customQueryFilter?
 			sql.filter( options._customQueryFilter )
@@ -469,7 +469,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 		for attr in args.sql.attrs
 			aFns.push @_validateField( attr, args.data[ attr.name ], args )
 
-		async.parallel aFns, ( err, results )=>
+		async.parallel aFns, ( err, results )->
 			if err
 				cb( err )
 				return
@@ -548,7 +548,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				sql.filter( field.name, value )
 				options._afterSave[ field.name ].checkEqualOld = true
 
-			if _validation.fireEventOnChange? 
+			if _validation.fireEventOnChange?
 				options._afterSave[ field.name ].fireEventOnChange = _validation.fireEventOnChange
 
 			if _validation.allreadyExistend?
@@ -619,7 +619,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 						return
 
 					#@emit type, id, results
-					_ret = @builder.convertToType( results ) 
+					_ret = @builder.convertToType( results )
 					cb( null, _ret )
 					
 					@emit( type, null, _ret )
@@ -650,7 +650,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 				data[ @sIdField ] = @_generateNewID()
 
-				_valData = 
+				_valData =
 					id: null
 					data: data
 					sql: sql
@@ -670,7 +670,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				cb( err )
 				return
 
-			@_afterSave results, id, data, options, ( err, item )=>
+			@_afterSave results, id, data, options, ( err, item )->
 				if err
 					cb( err )
 					return
@@ -742,7 +742,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 	# # Error message mapping
 	ERRORS: =>
-		@extend super, 
+		@extend super,
 			"not-found": "Element not found"
 			"deprecated-option": "You tried to use the deprecated option: `<%= key %>`"
 			"invalid-filter": "A filter has of the .find()` method to be an object"
@@ -760,5 +760,3 @@ module.exports = class MySQLTable extends require( "./basic" )
 			"invalid-join-foreignfield": "You have to define a vailid field `<%= field %>` of the table `<%= foreign %>` to join the table `<%= self %>`"
 			"missing-join-table": "You have to define a foreign table joining this table `<%= self %>`"
 			"invalid-join-table": "You have to define a existing foreign table `<%= foreign %>` as string or MySQLTable instance to join to this table `<%= self %>`"
-
-

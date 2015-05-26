@@ -325,7 +325,7 @@ module.exports = ( options, escape = mysql.escape )->
 						when "sub"
 							# `column in ( ?[0], ?[1], ... ?[n] )`
 							subtable = new SQLBuilder()
-							subtable.table = _val.table 
+							subtable.table = _val.table
 							subtable.fields = _val.field
 							subtable.filter( _val.filter )
 							_filter += "in ( #{ subtable.select( false ) })"
@@ -347,7 +347,7 @@ module.exports = ( options, escape = mysql.escape )->
 		addJoin: ( type, field, fSqlBuilder, fField, fFilters )=>
 			#console.log @table, type, field, fSqlBuilder.table, fField, fFilters
 			@_c.filters or= []
-			@_c.joins.push 
+			@_c.joins.push
 				type: type
 				field: field
 				table: fSqlBuilder.table
@@ -385,7 +385,7 @@ module.exports = ( options, escape = mysql.escape )->
 		@api public
 		###
 		and: =>
-			if @_c.filters?.length			
+			if @_c.filters?.length
 				@_c._filterCombine = "AND"
 			@
 
@@ -457,7 +457,7 @@ module.exports = ( options, escape = mysql.escape )->
 				_cnf = @_getAttrConfig( key )
 				if _cnf
 					switch _cnf.type
-						when "string", "S"		
+						when "string", "S"
 							return value.toString()
 						when "number", "N"
 							if "." in value
@@ -484,7 +484,7 @@ module.exports = ( options, escape = mysql.escape )->
 
 						when "date", "D"
 							if value is "0000-00-00" # handle special date case if the date is 0 return as not defined
-							 	return null
+								return null
 							if _.isDate( value )
 								return value
 							else
@@ -651,7 +651,7 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		setOrderField: ( fields )=>
-			if _.isArray( fields ) 
+			if _.isArray( fields )
 				@_c.orderBy = fields
 			else
 				@_c.orderBy = for fld in fields.split( "," )
@@ -686,7 +686,7 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		setForward: ( dir )=>
-			if _.isBoolean( dir ) 
+			if _.isBoolean( dir )
 				@_c.forward = dir
 			else
 				if dir.toLowerCase() is "desc"
@@ -706,7 +706,7 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		getForward: =>
-			if @_c.forward? then @_c.forward else true 
+			if @_c.forward? then @_c.forward else true
 
 		###
 		## getOrderBy
@@ -744,7 +744,7 @@ module.exports = ( options, escape = mysql.escape )->
 				if withWhere
 					"WHERE #{ _filters.join( "\n" ) }"
 				else
-					 _filters.join( "\n" )
+					_filters.join( "\n" )
 			else
 				null
 
@@ -1000,7 +1000,7 @@ module.exports = ( options, escape = mysql.escape )->
 		
 		@api private
 		###
-		_getSaveVariables: ( attributes, isInsert = false )=> 
+		_getSaveVariables: ( attributes, isInsert = false )=>
 			_keys = []
 			_vals = []
 			# loop through all attributes
@@ -1056,7 +1056,7 @@ module.exports = ( options, escape = mysql.escape )->
 							if not _val?
 								_vals.push( escape( "{}" ) )
 							else
-								try 
+								try
 									_vals.push( escape( JSON.stringify( _val ) ) )
 							_keys.push( _key )
 
@@ -1149,7 +1149,7 @@ module.exports = ( options, escape = mysql.escape )->
 			
 			# set by array
 			else if _.isArray( inp )
-				if not inp.length 
+				if not inp.length
 					# set empty by empty array
 					escape( dlm )
 				else
@@ -1210,11 +1210,11 @@ module.exports = ( options, escape = mysql.escape )->
 					# return `null` if nothing has to be changed
 					if added.length or usedRem
 						_set
-					else 
+					else
 						null
 			# set by string or number
 			else if inp?
-				 escape( dlm + inp + dlm )
+				escape( dlm + inp + dlm )
 
 			# noting to set
 			else
@@ -1222,6 +1222,6 @@ module.exports = ( options, escape = mysql.escape )->
 
 		# # Error message mapping
 		ERRORS: =>
-			@extend super, 
+			@extend super,
 				"no-tables": "No table defined"
 				"no-id-field": "No id field defined"

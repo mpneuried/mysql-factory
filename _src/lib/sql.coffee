@@ -720,10 +720,19 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		getOrderBy: =>
+			_dir = "DESC"
 			if @forward
-				"ORDER BY #{@table}.#{ @orderfield } ASC"
+				_dir = "ASC"
+				
+			_ofield = @orderfield
+			_afields = []
+			if _ofield.indexOf( "," ) >= 0
+				for ofield in _ofield.split( "," )
+					_afields.push( "#{@table}.#{ utils.trim( ofield ) } #{_dir}" )
+			
+				"ORDER BY #{_afields.join( ", " )}"
 			else
-				"ORDER BY #{@table}.#{ @orderfield } DESC"
+				"ORDER BY #{@table}.#{ @orderfield } #{_dir}"
 
 		###
 		## getWhere

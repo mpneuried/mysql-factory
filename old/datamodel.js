@@ -553,7 +553,7 @@
     };
 
     Datamodel.prototype._validateField = function(field, value, oldValue, isUpdate, id, options, cba) {
-      var _m, asyncCheck, asyncChecks, error, fnA, i, len, ref, rule, rulename, salt;
+      var _m, asyncCheck, asyncChecks, error, error1, error2, fnA, i, len, ref, rule, rulename, salt;
       try {
         switch (field.type) {
           case "string":
@@ -591,8 +591,8 @@
             if ((value != null) && !(_.isString(value) || _.isNumber(value) || _.isBoolean(value))) {
               try {
                 value = JSON.stringify(value);
-              } catch (_error) {
-                error = _error;
+              } catch (error1) {
+                error = error1;
                 cba(null, {
                   value: value,
                   success: false,
@@ -603,8 +603,8 @@
               }
             }
         }
-      } catch (_error) {
-        error = _error;
+      } catch (error2) {
+        error = error2;
       }
       asyncChecks = [];
       ref = field.validation;
@@ -1066,7 +1066,7 @@
     };
 
     Datamodel.prototype._postProcessField = function(field, value) {
-      var error;
+      var error, error1;
       try {
         switch (field.type) {
           case "string":
@@ -1096,8 +1096,8 @@
               value = JSON.parse(value);
             }
         }
-      } catch (_error) {
-        error = _error;
+      } catch (error1) {
+        error = error1;
         console.log("Convert Error", error);
       }
       return value;

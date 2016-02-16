@@ -4,7 +4,7 @@
 	"description": "ORM solution for mysql. Has been poirted form an internal project to open-source by updateing to the newest node-mysql version.",
 	"keywords": [ "mysql", "orm", "model", "factory", "table", "crud", "db", "database", "simple" ],
 	"tags": [ "mysql", "orm", "model", "factory", "table", "crud", "db", "database", "simple" ],
-	"version": "0.2.9",
+	"version": "0.2.10",
 	"homepage": "http://mpneuried.github.com/mysql-factory/",
 	"repository": {
 		"type": "git",

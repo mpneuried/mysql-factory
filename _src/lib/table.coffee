@@ -140,6 +140,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		if options.fields?
 			sql.fields = options.fields
+			
+		if options?.limit?
+			sql.limit = options.limit
+			if options.offset?
+				sql.offset = options.offset
 
 		sql.filter( @sIdField, ids )
 

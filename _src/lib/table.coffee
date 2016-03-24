@@ -294,7 +294,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 		
 		options.insertRetry = if data[ @sIdField ]? then +Infinity else 0
 
-		_valData = 
+		_valData =
 			isUpdate: false
 			id: null
 			data: data
@@ -424,7 +424,9 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		_data = {}
 		_data[ field ] = "crmt" + count
-
+		
+		_data = @_checkAndAddIncrementOnSave( _data, sql )
+		
 		stmt = [ sql.update( _data ), sql.select( false ) ]
 
 		@factory.exec( stmt, @_handleSingle( _type, id, opt, cb ) )
@@ -438,7 +440,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		sql.filter( @sIdField, id )
 		
-		_getStmt = @builder.clone().filter( @sIdField, id ).select( false ) 
+		_getStmt = @builder.clone().filter( @sIdField, id ).select( false )
 		stmts = [ _getStmt, sql.update( data ), _getStmt ]
 
 		@factory.exec( stmts, @_handleSave( "set", id, data, options, sql, cb ) )
@@ -744,6 +746,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 				return
 		else
 			return cb
+			
+			
+	_checkAndAddIncrementOnSave: ( data, sql )->
+		for _fn, field of sql.attrs when field?.validation?.incrementOnSave
+			data[ field.name ] = "incr"
+		return data
 
 	# # Error message mapping
 	ERRORS: =>

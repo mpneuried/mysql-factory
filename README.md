@@ -6,7 +6,7 @@ mysql-factory
 
 MySQL ORM solution to simplify the usage of the mysql connector.
 
-
+[![NPM](https://nodei.co/npm/mysql-factory.png?downloads=true&stars=true)](https://nodei.co/npm/mysql-factory/)
 
 ## Release History
 |Version|Date|Description|

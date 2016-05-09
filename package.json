@@ -33,7 +33,6 @@
 		"grunt-contrib-watch": "1.x",
 		"grunt-contrib-coffee": "1.x",
 		"grunt-include-replace": "4.x",
-		"grunt-mocha-cli": "2.x",
-		"grunt-docker": "0.x"
+		"grunt-mocha-cli": "2.x"
 	}
 }

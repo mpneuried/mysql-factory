@@ -64,7 +64,10 @@ module.exports =
 			rnum = Math.floor(Math.random() * chars.length)
 			randomstring += chars.substring(rnum, rnum + 1)
 			i++
-		randomstring
+		return randomstring
+	
+	randRange: ( lowVal, highVal )->
+		Math.floor( Math.random()*(highVal-lowVal+1 ))+lowVal
 
 	trim: ( str )->
 		return str.replace(/^\s+|\s+$/g, '')

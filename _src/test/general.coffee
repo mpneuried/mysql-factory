@@ -240,7 +240,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			return
 
 		it "TABLE.FIND", ( done )->
-			@timeout( 3000 )
+			@timeout( 6000 )
 			query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 			tableU.find query, ( err, items )->
 				throw err if err
@@ -251,7 +251,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			return
 
 		it "TABLE.FIND with limit", ( done )->
-			@timeout( 3000 )
+			@timeout( 6000 )
 			query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 			query.limit = 1
 			tableU.find( query, ( err, items )->
@@ -263,7 +263,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			return
 
 		it "TABLE.FIND with limit by option", ( done )->
-			
+			@timeout( 6000 )
 			query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 			tableU.find( query, ( err, items )->
 				throw err if err
@@ -274,7 +274,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			return
 
 		it "TABLE.FIND with `idonly`", ( done )->
-
+			@timeout( 6000 )
 			query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 			tableU.find( query, ( err, items )->
 				throw err if err

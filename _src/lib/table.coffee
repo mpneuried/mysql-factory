@@ -43,8 +43,9 @@ module.exports = class MySQLTable extends require( "./basic" )
 			sortdirection: "decs"
 			fields: {}
 
-			createIdString: ->utils.randomString( 5 )
+			createIdString: @_defaultIdString
 			defaultBcryptRounds: 8
+			defaultStringIdLength: 5
 			stringIdInsertRetrys: 5
 
 	###	
@@ -62,34 +63,48 @@ module.exports = class MySQLTable extends require( "./basic" )
 		
 		# set internal values
 		@factory = options.factory
-
-		@getter "tablename", =>
-			@settings.tablename
-
-		@getter "sIdField", =>
-			@settings.sIdField
-
-		@getter "hasStringId", =>
-			@settings.hasStringId or false
-
-		@getter "sortfield", =>
-			@settings.sortfield or @sIdField
-
-		@getter "sortdirection", =>
-			@settings.sortdirection or "desc"
-
-		@getter "createIdString", =>
-			@settings.createIdString or @config.createIdString
 		
-		@define( "limit", ( =>@builder.defaultLimit ), ( ( _limit )=>@builder.defaultLimit = _limit ) )
-
 		super( options )
 		
+		@getter "createIdString", =>
+			return @settings.createIdString or @config.createIdString
+		
+		@getter "defaultStringIdLength", =>
+			return @settings.defaultStringIdLength or @config.defaultStringIdLength
+		
+		@define( "limit", ( =>@builder.defaultLimit ), ( ( _limit )=>@builder.defaultLimit = _limit ) )
 
 		@info "init table", @tablename, @sIdField
 
 		return
+	
+	###
+	## _initGetters
+	
+	`table._initGetters()`
+	
+	Define the getter/setter methods
+	
+	@api pruvate
+	###
+	_initGetters: =>
+		@getter "tablename", =>
+			return @settings.tablename
 
+		@getter "sIdField", =>
+			return @settings.sIdField
+
+		@getter "hasStringId", =>
+			return @settings.hasStringId or false
+
+		@getter "sortfield", =>
+			return @settings.sortfield or @sIdField
+
+		@getter "sortdirection", =>
+			return @settings.sortdirection or "desc"
+		
+		return
+	
 	###
 	## initialize
 	
@@ -579,8 +594,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 	_generateNewID: ( id )=>
 		if not id? and @hasStringId
 			id = @createIdString()
-
 		return id
+	
+	_defaultIdString: =>
+		return utils.randomString( 1, 0 ) + utils.randomString( ( @defaultStringIdLength - 1 ), 1 )
 
 	_getOptions: ( options, type )=>
 		_opt = @extend(

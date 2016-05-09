@@ -34,7 +34,9 @@ module.exports = class Basic extends require('events').EventEmitter
 	###
 	constructor: ( options )->
 		@on "_log", @_log
-
+		
+		@_initGetters()
+		
 		@config = extend( true, {}, @defaults(), options )
 
 		# init errors
@@ -44,6 +46,18 @@ module.exports = class Basic extends require('events').EventEmitter
 
 		return
 
+	###
+	## _initGetters
+	
+	`basic._initGetters()`
+	
+	Overwritible Method to create the getter/setter methods
+	
+	@api pruvate
+	###
+	_initGetters: ->
+		return
+		
 	###
 	## initialize
 	

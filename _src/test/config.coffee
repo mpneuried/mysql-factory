@@ -68,6 +68,7 @@ module.exports  =
 			sIdField: "id"
 			# define id as a string [ default: false ]
 			hasStringId: true
+			defaultStringIdLength: 5
 			# add redis as cache in front of the get method [ default: false ]
 			# use fieldset feature
 			useFieldsets: true

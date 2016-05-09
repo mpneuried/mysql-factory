@@ -38,22 +38,6 @@ module.exports = (grunt) ->
 				files:
 					"index.js": ["index.js"]
 
-		docker:
-			codedocs:
-				expand: true
-				src: [ "README.md","_src/index.coffee","_src/lib/*.coffee" ]
-				dest: "_docs/"
-				options:
-					onlyUpdated: false
-					colourScheme: "autumn"
-					ignoreHidden: false
-					sidebarState: true
-					exclude: false
-					lineNums: true
-					js: []
-					css: []
-					extras: []
-
 	
 	# Load npm modules
 	grunt.loadNpmTasks "grunt-contrib-watch"
@@ -63,7 +47,6 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks "grunt-docker"
 
 	# ALIAS TASKS
-	grunt.registerTask "docs", "docker:codedocs"
 	grunt.registerTask "default", "build"
 	grunt.registerTask "test", [ "mochacli:main" ]
 	grunt.registerTask "w", "watch"

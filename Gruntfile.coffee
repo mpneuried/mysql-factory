@@ -44,7 +44,6 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks "grunt-contrib-coffee"
 	grunt.loadNpmTasks "grunt-mocha-cli"
 	grunt.loadNpmTasks "grunt-include-replace"
-	grunt.loadNpmTasks "grunt-docker"
 
 	# ALIAS TASKS
 	grunt.registerTask "default", "build"

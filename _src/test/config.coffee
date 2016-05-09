@@ -7,9 +7,9 @@ module.exports  =
 		host: if _envVars.MYSQLFAC_TEST_HOST? then _envVars.MYSQLFAC_TEST_HOST else 'localhost'
 		user: if _envVars.MYSQLFAC_TEST_USER? then _envVars.MYSQLFAC_TEST_USER else 'root'
 		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'root'
-		database: if _envVars.MYSQLFAC_TEST_DB? then _envVars.MYSQLFAC_TEST_DB else "milonst_second"
+		database: if _envVars.MYSQLFAC_TEST_DB? then _envVars.MYSQLFAC_TEST_DB else "mysql-factory-test"
 		timezone: "+0200"
-		logging: 
+		logging:
 			severity: "warning"
 	###
 		returnFormat: ( err, result )=>
@@ -39,15 +39,15 @@ module.exports  =
 	test:
 		singleCreateTableTest: "Users"
 
-		getTest: 
+		getTest:
 			tbl: "Users"
 			id: "Dwrpf"
 
-		mgetTest: 
+		mgetTest:
 			id: [ "Dwrpf", "RkCIA" ]
 
-		findTest: 
-			q: 
+		findTest:
+			q:
 				firstname: "Maxi"
 				role: "TRAINER"
 
@@ -60,7 +60,7 @@ module.exports  =
 			token: "desfire-#{utils.randomString( 15 )}"
 			_t: 0
 
-	tables: 
+	tables:
 		"Users":
 			# database tablename
 			tablename: "users"
@@ -113,7 +113,7 @@ module.exports  =
 					#console.log "EVENT", "USERS-EVENT: currplan.planchanged", field, oldValue, newValue 
 					return
 				
-				"firstname.userchanged,lastname.userchanged,birthday.userchanged,trainer_id.userchanged,image.userchanged,isactive.userchanged,colors.userchanged": ( evnt, oldValue, newValue, id )=>
+				"firstname.userchanged,lastname.userchanged,birthday.userchanged,trainer_id.userchanged,image.userchanged,isactive.userchanged,colors.userchanged": ( evnt, oldValue, newValue, id )->
 					#console.log "EVENT", "USERS-EVENT: userchanged", evnt, oldValue, newValue, id 
 					return
 
@@ -169,7 +169,7 @@ module.exports  =
 			tablename: "contracts"
 			sIdField: "id"
 			useFieldsets: true
-			fields: 
+			fields:
 				"id":				{ name: "id",			fieldsets: [ "ls", "det" ], search: false, type: "number" }
 				"user_id": 			{ name: "user_id",		fieldsets: [ "ls", "det" ], search: false, type: "string" }
 				"contractnumber":	{ name: "contractnumber",fieldsets: [ "ls", "det" ], search: false, type: "string" }
@@ -186,7 +186,7 @@ module.exports  =
 
 
 			# solution to inject logic on events.
-			events: 
+			events:
 				"mdel,del": ( eventname, err, res )->
 					#console.log "EVENT", "CONTRACTS-EVENT: mdel,del",  eventname, err, res
 					return
@@ -196,10 +196,10 @@ module.exports  =
 					#console.log "EVENT", "CONTRACTS-EVENT: set",  eventname, err, res
 					return
 		
-		"Tokens": 
+		"Tokens":
 			tablename: "tokens"
 			sIdField: "id"
-			fields: 
+			fields:
 				"id": 				{ name: "id",			search: false, type: "number" }
 				"user_id": 			{ name: "user_id",		search: false, type: "string", validation: { isRequired: true } }
 				"studio_id": 		{ name: "studio_id",	search: false, type: "number", validation: { isRequired: true } }
@@ -208,21 +208,20 @@ module.exports  =
 				"_u": 				{ name: "_u",			search: false, type: "number", validation: { incrementOnSave: true } }
 
 
-			events: 
+			events:
 				"mdel,del,set": ( eventname, err, res )->
 					#console.log "EVENT", "TOKENS-EVENT: mdel,del,set",  eventname, err, res
 					return
 
 
-		"Apikeys": 
+		"Apikeys":
 			tablename: "apikeys"
 			sIdField: "apikey"
 			hasStringId: true
-			fields: 
+			fields:
 				"apikey": 			{ name: "apikey",		search: false, type: "string" }
 				"studio_id": 		{ name: "studio_id",	search: false, type: "number", validation: { isRequired: true } }
 				"jsonOptions":		{ name: "jsonOptions",	search: false, type: "json" }
 
 			createIdString: ->
 				utils.generateUID()
-

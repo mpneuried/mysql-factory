@@ -84,7 +84,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			_saveUserId = null
 			_saveUserT = 0
 
-			_testUsers = [] 
+			_testUsers = []
 
 			it "get test table `#{_CONFIG.test.getTest.tbl}`", ( done )->
 
@@ -112,7 +112,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 			it "TABLE.GET", ( done )->
 				_id =  _CONFIG.test.getTest.id
-				tableU.get _id, ( err, item )=>
+				tableU.get _id, ( err, item )->
 					throw err if err
 
 					should.exist( item.id )
@@ -124,7 +124,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields as array", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 
@@ -139,7 +139,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields as string", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 
@@ -153,7 +153,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields as set", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 
@@ -167,7 +167,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields `all`", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 					_keys = Object.keys( item )
@@ -180,7 +180,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields `*`", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 
@@ -194,7 +194,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields `idonly`", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 
@@ -208,7 +208,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.GET fields by filter function", ( done )->
 
 				_id =  _CONFIG.test.getTest.id
-				tableU.get( _id, ( err, item )=>
+				tableU.get( _id, ( err, item )->
 					throw err if err
 					should.exist( item.id )
 
@@ -223,7 +223,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.MGET", ( done )->
 
 				_ids = JSON.parse( JSON.stringify( _CONFIG.test.mgetTest.id ) )
-				tableU.mget _ids, ( err, items )=>
+				tableU.mget _ids, ( err, items )->
 					throw err if err
 					items.should.have.length(2)
 					_.difference(_CONFIG.test.mgetTest.id,_.pluck( items, "id" ) ).should.have.length(0)
@@ -233,21 +233,21 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.FIND", ( done )->
-
+				@timeout( 3000 )
 				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
-				tableU.find query, ( err, items )=>
+				tableU.find query, ( err, items )->
 					throw err if err
-					items.should.have.length(4)
+					items.should.have.length(6)
 					done()
 					return
 
 				return
 
 			it "TABLE.FIND with limit", ( done )->
-
+				@timeout( 3000 )
 				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 				query.limit = 1
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					throw err if err
 					items.should.have.length(1)
 					done()
@@ -256,9 +256,9 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.FIND with limit by option", ( done )->
-
+				
 				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					throw err if err
 					items.should.have.length(1)
 					done()
@@ -269,7 +269,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.FIND with `idonly`", ( done )->
 
 				query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					throw err if err
 					
 					items.should.be.an.instanceOf(Array)
@@ -282,21 +282,21 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 			it "TABLE.FIND studio tokens with subquery", ( done )->
 
-				query = 
-					token: 
+				query =
+					token:
 						"startsWith": "desfire-801e"
-				opt = 
+				opt =
 					limit: 0
 					_customQueryFilter:
-						"user_id": 
-							sub: 
+						"user_id":
+							sub:
 								table: "contracts"
 								field: "user_id"
-								filter: 
+								filter:
 									studio_id: 1
 									contracttype: 1
 
-				tableT.find( query, ( err, items )=>
+				tableT.find( query, ( err, items )->
 					throw err if err
 					items.should.have.property( "length" ).and.be.above(1)
 					#console.log "ITEMS STD-TOKENS SUB", items.length
@@ -307,19 +307,19 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 			it "TABLE.FIND studio users with subquery", ( done )->
 
-				query = 
-					"id": 
-						sub: 
+				query =
+					"id":
+						sub:
 							table: "contracts"
 							field: "user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				opt = 
+				opt =
 					limit: 0
 				
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					throw err if err
 					items.should.have.property( "length" ).and.be.above(1)
 					#console.log "ITEMS STD-USR SUB", items.length
@@ -330,23 +330,23 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			
 			it "TABLE.FIND studio tokens with TABLE.JOIN", ( done )->
 
-				query = 
-					token: 
+				query =
+					token:
 						"startsWith": "desfire-801e"
 
 				
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"user_id": 
+					joins:
+						"user_id":
 							type: "inner"
 							table: "Contracts"
 							field: "user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableT.find( query, ( err, items )=>
+				tableT.find( query, ( err, items )->
 					throw err if err
 					items.should.have.property( "length" ).and.be.above(1)
 					#console.log "ITEMS STD-TOKENS JOIN", items.length
@@ -360,17 +360,17 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				query = {}
 
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"id": 
+					joins:
+						"id":
 							table: tableC
 							field: "user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					throw err if err
 					items.should.have.property( "length" ).and.be.above(1)
 					#console.log "ITEMS STD-USR JOIN", items.length
@@ -383,17 +383,17 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				query = {}
 
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"id": 
+					joins:
+						"id":
 							#table: tableC
 							field: "user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "missing-join-table" )
@@ -404,20 +404,20 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 			it "TABLE.JOIN without field", ( done )->
 
-				query = 
+				query =
 					studio_id: 1
 					contracttype: 1
 
-				opt = 
+				opt =
 					fields: "*"
 					limit: 0
-					joins: 
-						"user_id": 
+					joins:
+						"user_id":
 							type: "left outer"
 							table: tableU
 								
 
-				tableT.find( query, ( err, items )=>
+				tableT.find( query, ( err, items )->
 					throw err if err
 					items.should.have.property( "length" ).and.be.above(1)
 					done()
@@ -429,17 +429,17 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				query = {}
 
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"_id": 
+					joins:
+						"_id":
 							table: tableC
 							field: "user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "invalid-join-field" )
@@ -452,17 +452,17 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				query = {}
 
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"id": 
+					joins:
+						"id":
 							table: tableC
 							field: "_user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "invalid-join-foreignfield" )
@@ -475,17 +475,17 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				query = {}
 
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"id": 
+					joins:
+						"id":
 							table: "_Contracts"
 							field: "_user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "invalid-join-table" )
@@ -498,18 +498,18 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				query = {}
 
-				opt = 
+				opt =
 					limit: 0
-					joins: 
-						"id": 
+					joins:
+						"id":
 							type: "foo"
 							table: tableC
 							field: "_user_id"
-							filter: 
+							filter:
 								studio_id: 1
 								contracttype: 1
 
-				tableU.find( query, ( err, items )=>
+				tableU.find( query, ( err, items )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "invalid-join-type" )
@@ -524,7 +524,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				it "TABLE.FIND with option `_customQueryFilter`", ( done )->
 
 					query = _CONFIG.test.findTest.q
-					tableU.find( query, ( err, items )=>
+					tableU.find( query, ( err, items )->
 						should.exist( err )
 						should.exist( err.name )
 						err.name.should.equal( "deprecated-option" )
@@ -536,7 +536,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 				it "TABLE.FIND with invalid filter", ( done )->
 
-					tableU.find "wrong", ( err, items )=>
+					tableU.find "wrong", ( err, items )->
 						should.exist( err )
 						should.exist( err.name )
 						err.name.should.equal( "invalid-filter" )
@@ -553,7 +553,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					email: "test.#{_utils.randomString( 5 )}@test.de"
 					_t: 0
 
-				tableU.set( data, ( err, item )=>
+				tableU.set( data, ( err, item )->
 					throw err if err
 
 					_saveUserId = item.id
@@ -581,7 +581,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					email: "test.#{_utils.randomString( 5 )}@test.de"
 					_t: 0
 
-				tableU.set( data, ( err, item )=>
+				tableU.set( data, ( err, item )->
 					throw err if err
 
 					_testUsers.push item
@@ -608,7 +608,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					email: "test.#{_utils.randomString( 5 )}@test.de"
 					_t: 0
 
-				tableU.set( data, ( err, item )=>
+				tableU.set( data, ( err, item )->
 					throw err if err
 
 					_testUsers.push item
@@ -635,7 +635,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					email: "test.#{_utils.randomString( 5 )}@test.de"
 					_t: 0
 
-				tableU.set( data, ( err, item )=>
+				tableU.set( data, ( err, item )->
 					throw err if err
 
 					_testUsers.push item
@@ -660,7 +660,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					studio_id: 1
 					jsonOptions: {}
 
-				_tbl.set( data, ( err, item )=>
+				_tbl.set( data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('apikey').and.match( /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[0-9a-f]{4}-[0-9a-f]{12}/ )
@@ -673,7 +673,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 			it "TABLE.INSERT autoincrement-id", ( done )->
 				data = JSON.parse( JSON.stringify( _CONFIG.test.insertTestToken ) )
-				tableT.set( data, ( err, item )=>
+				tableT.set( data, ( err, item )->
 					throw err if err
 					
 					item.should.have.property('id')
@@ -698,7 +698,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 						gender: true
 						role: "USER"
 						_t: 0
-					tableU.set( data, ( err, item )=>
+					tableU.set( data, ( err, item )->
 						# special case. A predefined is could allready exist
 						if err?.code is "ER_DUP_ENTRY"
 							done()
@@ -728,7 +728,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 						gender: true
 						role: "USER"
 						_t: 0
-					tableU.set( data, ( err, item )=>
+					tableU.set( data, ( err, item )->
 						should.exist( err )
 						err.code.should.equal( "ER_DUP_ENTRY" )
 
@@ -738,10 +738,10 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					return
 
 			it "TABLE.UPDATE", ( done )->
-				data = 
+				data =
 					lastname: "Update1"
 					_t: _saveUserT
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update1" )
@@ -760,7 +760,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					password: "test"
 					_t: _saveUserT
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update2" )
@@ -827,7 +827,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				tableU.on "set", fnEvnt4
 				
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update3" )
@@ -850,7 +850,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					role: "MILON"
 					_t: _saveUserT
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "value-not-allowed" )
@@ -863,12 +863,12 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.UPDATE with with json object", ( done )->
 				data =
 					lastname: "Update5"
-					jsonSettings: 
+					jsonSettings:
 						a: 123
 						b: 456
 					_t: _saveUserT
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update5" )
@@ -890,7 +890,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					lastname: "Update6"
 					_t: _startTime
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "validation-notequal" )
@@ -913,7 +913,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				data =
 					lastname: "Update7b"
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "validation-notequal-required" )
@@ -932,7 +932,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					_u: 99
 					_t: _saveUserT
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastname').and.equal( "Update7" )
@@ -952,7 +952,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					email: "testmilon@test.de"
 					_t: _saveUserT
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "validation-already-existend" )
@@ -978,7 +978,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					_t: _saveUserT
 
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastlogin').and.equal( Math.round( _date.getTime() / 1000 ) )
@@ -1003,7 +1003,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					_t: _saveUserT
 
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastlogin').and.equal( Math.round( _date / 1000 ) )
@@ -1028,7 +1028,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					_t: _saveUserT
 
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastlogin').and.equal( _date )
@@ -1053,7 +1053,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					_t: _saveUserT
 
 
-				tableU.set( _saveUserId, data, ( err, item )=>
+				tableU.set( _saveUserId, data, ( err, item )->
 					throw err if err
 
 					item.should.have.property('lastlogin').and.equal( _date.unix() )
@@ -1070,7 +1070,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.HAS", ( done )->
-				tableU.has( _saveUserId, ( err, existend )=>
+				tableU.has( _saveUserId, ( err, existend )->
 					throw err if err
 					existend.should.be.ok
 					done()
@@ -1079,7 +1079,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.HAS not existend", ( done )->
-				tableU.has( "notexist", ( err, existend )=>
+				tableU.has( "notexist", ( err, existend )->
 					throw err if err
 					existend.should.not.be.ok
 					done()
@@ -1088,23 +1088,23 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.COUNT", ( done )->
-				filter = 
+				filter =
 					firstname: "Maxi"
 					role: "TRAINER"
-				tableU.count( filter, ( err, count )=>
+				tableU.count( filter, ( err, count )->
 					throw err if err
 					should.exist( count )
-					count.should.equal( 4 )
+					count.should.equal( 6 )
 					done()
 					return
 				, {} )
 				return
 
 			it "TABLE.COUNT empty", ( done )->
-				filter = 
+				filter =
 					firstname: "Maxi"
 					role: "INVALIDROLE"
-				tableU.count( filter, ( err, count )=>
+				tableU.count( filter, ( err, count )->
 					throw err if err
 					should.exist( count )
 					count.should.equal( 0 )
@@ -1114,7 +1114,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.INCREMENT", ( done )->
-				tableU.increment( _saveUserId, "plansversion", ( err, count )=>
+				tableU.increment( _saveUserId, "plansversion", ( err, count )->
 					throw err if err
 					should.exist( count )
 					count.should.equal( 1 )
@@ -1124,7 +1124,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.INCREMENT second increment", ( done )->
-				tableU.increment( _saveUserId, "plansversion", ( err, count )=>
+				tableU.increment( _saveUserId, "plansversion", ( err, count )->
 					throw err if err
 					should.exist( count )
 					count.should.equal( 2 )
@@ -1134,7 +1134,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.INCREMENT unknown field", ( done )->
-				tableU.increment( _saveUserId, "unknown", ( err, count )=>
+				tableU.increment( _saveUserId, "unknown", ( err, count )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "invalid-field" )
@@ -1148,7 +1148,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.INCREMENT unknown id", ( done )->
-				tableU.increment( "unknown", "plansversion", ( err, count )=>
+				tableU.increment( "unknown", "plansversion", ( err, count )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "not-found" )
@@ -1159,7 +1159,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.DECREMENT", ( done )->
-				tableU.decrement( _saveUserId, "plansversion", ( err, count )=>
+				tableU.decrement( _saveUserId, "plansversion", ( err, count )->
 					throw err if err
 					should.exist( count )
 					count.should.equal( 1 )
@@ -1169,7 +1169,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.INCREMENT unknown field", ( done )->
-				tableU.decrement( _saveUserId, "unknown", ( err, count )=>
+				tableU.decrement( _saveUserId, "unknown", ( err, count )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "invalid-field" )
@@ -1183,7 +1183,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				return
 
 			it "TABLE.INCREMENT unknown id", ( done )->
-				tableU.decrement( "unknown", "plansversion", ( err, count )=>
+				tableU.decrement( "unknown", "plansversion", ( err, count )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "not-found" )
@@ -1197,7 +1197,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				
 				_usr = _testUsers[ 0 ]
 
-				tableU.del( _usr.id, ( err, item )=>
+				tableU.del( _usr.id, ( err, item )->
 					throw err if err
 
 					item.should.have.property('id')
@@ -1216,7 +1216,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				
 				_usr = _testUsers[ 0 ]
 
-				tableU.get( _usr.id, ( err, item )=>
+				tableU.get( _usr.id, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "not-found" )
@@ -1229,7 +1229,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 			it "TABLE.DEL deleted", ( done )->
 				
 				_usr = _testUsers[ 0 ]
-				tableU.del( _usr.id, ( err, item )=>
+				tableU.del( _usr.id, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "not-found" )
@@ -1243,7 +1243,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				_usrA = _testUsers[ 1 ]
 				_usrB = _testUsers[ 2 ]
 				ids = [ _usrA.id, _usrB.id ]
-				tableU.mdel( user_id: ids, ( err, items )=>
+				tableU.mdel( user_id: ids, ( err, items )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "no-filter" )
@@ -1257,7 +1257,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				_usrA = _testUsers[ 1 ]
 				_usrB = _testUsers[ 2 ]
 				ids = [ _usrA.id, _usrB.id ]
-				tableU.mdel( id: ids, ( err, items )=>
+				tableU.mdel( id: ids, ( err, items )->
 					throw err if err
 					_.difference(ids,_.pluck( items, "id" ) ).should.have.length(0)
 
@@ -1268,7 +1268,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 
 			it "TABLE.GET", ( done )->
 				_id =  _CONFIG.test.getTest.id
-				tableU.get _testUsers[ 1 ].id, ( err, item )=>
+				tableU.get _testUsers[ 1 ].id, ( err, item )->
 					should.exist( err )
 					should.exist( err.name )
 					err.name.should.equal( "not-found" )

@@ -204,7 +204,7 @@ module.exports = class MySQLFactory extends require( "./basic" )
 				delete @_tables[ tableName ]
 			
 			# generate a [Table](table.coffee.html) object for each table-element out of @tableSettings
-			_opt = 
+			_opt =
 				factory: @
 				logging: @config.logging
 				returnFormat: @config.returnFormat
@@ -225,6 +225,6 @@ module.exports = class MySQLFactory extends require( "./basic" )
 
 	# # Error message mapping
 	ERRORS: =>
-		@extend super, 
+		@extend super,
 			"no-tables-fetched": "Currently not tables fetched. Please run `factory.connect()` first."
 			"table-not-found": "Table `<%= tableName %>` not found."

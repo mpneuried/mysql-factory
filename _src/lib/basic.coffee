@@ -14,7 +14,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	extend: extend
 
 	# **defaults** *Function* basic object to hold config defaults. Will be overwritten by the constructor options
-	defaults: =>
+	defaults: ->
 		logging:
 			severity: "warning"
 			severitys: "fatal,error,warning,info,debug".split( "," )
@@ -50,7 +50,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	
 	@api public
 	###
-	initialize: =>
+	initialize: ->
 		return
 
 	###
@@ -70,7 +70,7 @@ module.exports = class Basic extends require('events').EventEmitter
 		[ prop, fnGet, fnSet ] = arguments
 		if _.isFunction( fnGet )
 			# set the `defineProperty` object
-			_oGetSet = 
+			_oGetSet =
 				get: fnGet
 			_oGetSet.set = fnSet if fnSet? and _.isFunction( fnSet )
 			Object.defineProperty @, prop, _oGetSet
@@ -109,7 +109,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	###
 	setter: ( prop, fnGet )=>
 		Object.defineProperty @, prop, set: fnGet
-		return	
+		return
 
 	# handle a error
 	###
@@ -134,13 +134,13 @@ module.exports = class Basic extends require('events').EventEmitter
 			else
 				_err.message = @_ERRORS?[ err ]?( data ) or "unkown"
 			_err.customError = true
-		else 
+		else
 			_err = err
 
 		if errExnd?
 			_err.data = errExnd
 
-		for _k, _v of data 
+		for _k, _v of data
 			_err[ _k ] = _v
 
 		if _.isFunction( cb )
@@ -167,7 +167,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	###
 	log: ( severity, code, content... )=>
 		args = [ "_log", severity, code ]
-		@emit.apply( @, args.concat( content ) ) 
+		@emit.apply( @, args.concat( content ) )
 		return
 
 	###
@@ -219,27 +219,27 @@ module.exports = class Basic extends require('events').EventEmitter
 
 	fatal: ( code, content... )=>
 		args = [ "_log", "fatal", code ]
-		@emit.apply( @, args.concat( content ) ) 
+		@emit.apply( @, args.concat( content ) )
 		return
 
 	error: ( code, content... )=>
 		args = [ "_log", "error", code ]
-		@emit.apply( @, args.concat( content ) ) 
+		@emit.apply( @, args.concat( content ) )
 		return
 
 	warning: ( code, content... )=>
 		args = ["_log",  "warning", code ]
-		@emit.apply( @, args.concat( content ) ) 
+		@emit.apply( @, args.concat( content ) )
 		return
 
 	info: ( code, content... )=>
 		args = [ "_log", "info", code ]
-		@emit.apply( @, args.concat( content ) ) 
+		@emit.apply( @, args.concat( content ) )
 		return
 
 	debug: ( code, content... )=>
 		args = [ "_log", "debug", code ]
-		@emit.apply( @, args.concat( content ) ) 
+		@emit.apply( @, args.concat( content ) )
 		return
 
 	###
@@ -286,5 +286,5 @@ module.exports = class Basic extends require('events').EventEmitter
 		return
 
 	# error message mapping
-	ERRORS: =>
+	ERRORS: ->
 		"not-implemented": "This function is planed but currently not implemented"

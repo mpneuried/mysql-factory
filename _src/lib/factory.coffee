@@ -1,5 +1,7 @@
 # import the external modules
-_ = require('lodash')._
+_isArray = require( "lodash/isArray" )
+_omit = require( "lodash/omit" )
+_bind = require( "lodash/bind" )
 mysql = require 'mysql'
 
 # import the internal modules
@@ -96,7 +98,7 @@ module.exports = class MySQLFactory extends require( "./basic" )
 		@debug "run query", args
 
 		# if statements is an Array concat them to a multi statement
-		if _.isArray( args[ 0 ] )
+		if _isArray( args[ 0 ] )
 			args[ 0 ] = args[ 0 ].join( ";\n" )
 		
 		# get a connection from the pool
@@ -209,11 +211,11 @@ module.exports = class MySQLFactory extends require( "./basic" )
 				logging: @config.logging
 				returnFormat: @config.returnFormat
 			
-			_tblObj = new Table( _.omit( table, "events" ), _opt )
+			_tblObj = new Table( _omit( table, "events" ), _opt )
 
 			# add all defined event function to the model 
 			for events, fn of table.events
-				_tblObj.on( event, _.bind( fn, _tblObj, event ) ) for event in events.split( ',' )
+				_tblObj.on( event, _bind( fn, _tblObj, event ) ) for event in events.split( ',' )
 
 			@_tables[ tableName ] = _tblObj
 			@emit( "tableinit", tableName, _tblObj )

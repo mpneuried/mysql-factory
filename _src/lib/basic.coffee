@@ -1,5 +1,8 @@
 # import the external modules
-_ = require('lodash')._
+_isFunction = require( "lodash/isFunction" )
+_isString = require( "lodash/isString" )
+_template = require( "lodash/template" )
+
 extend = require('extend')
 colors = require('colors')
 
@@ -68,11 +71,11 @@ module.exports = class Basic extends require('events').EventEmitter
 	###
 	define: =>
 		[ prop, fnGet, fnSet ] = arguments
-		if _.isFunction( fnGet )
+		if _isFunction( fnGet )
 			# set the `defineProperty` object
 			_oGetSet =
 				get: fnGet
-			_oGetSet.set = fnSet if fnSet? and _.isFunction( fnSet )
+			_oGetSet.set = fnSet if fnSet? and _isFunction( fnSet )
 			Object.defineProperty @, prop, _oGetSet
 		else
 			# define by object
@@ -126,7 +129,7 @@ module.exports = class Basic extends require('events').EventEmitter
 	###
 	_handleError: ( cb, err, data = {}, errExnd )=>
 		# try to create a error Object with humanized message
-		if _.isString( err )
+		if _isString( err )
 			_err = new Error()
 			_err.name = err
 			if @isRest
@@ -143,10 +146,10 @@ module.exports = class Basic extends require('events').EventEmitter
 		for _k, _v of data
 			_err[ _k ] = _v
 
-		if _.isFunction( cb )
+		if _isFunction( cb )
 			#@log "error", "", _err
 			cb( _err )
-		else if _.isString( cb )
+		else if _isString( cb )
 			@log "error", cb, _err
 		else
 			throw _err
@@ -278,11 +281,11 @@ module.exports = class Basic extends require('events').EventEmitter
 		@_ERRORS = @ERRORS()
 		for key, msg of @_ERRORS
 			if @isRest
-				if not _.isFunction( msg[ 1 ] )
-					@_ERRORS[ key ][ 1 ] = _.template( msg[ 1 ] )
+				if not _isFunction( msg[ 1 ] )
+					@_ERRORS[ key ][ 1 ] = _template( msg[ 1 ] )
 			else
-				if not _.isFunction( msg )
-					@_ERRORS[ key ] = _.template( msg )
+				if not _isFunction( msg )
+					@_ERRORS[ key ] = _template( msg )
 		return
 
 	# error message mapping

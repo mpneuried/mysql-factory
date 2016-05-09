@@ -1,4 +1,6 @@
-_ = require('lodash')._
+_some = require( "lodash/some" )
+_identity = require( "lodash/identity" )
+_isArray = require( "lodash/isArray" )
 
 module.exports =
 
@@ -38,10 +40,10 @@ module.exports =
 	# check for a single `true` element in an array
 	checkArray: ( ar )->
 
-		if _.isArray( ar )
-			_.any( ar, _.identity )
+		if _isArray( ar )
+			return _some( ar, _identity )
 		else
-			_.identity( ar )
+			return _identity( ar )
 
 	generateUID: ->
 		"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace /[xy]/g, (c) ->

@@ -19,21 +19,21 @@
  	"main": "./index.js",
 	"dependencies": {
 		"extend": "3.0.x",
-		"async": "0.9.x",
+		"async": "1.5.x",
 		"colors": "1.1.x",
-		"lodash": "3.10.x",
+		"lodash": "4.x",
 		"bcrypt": "0.8.x",
-		"moment": "2.12.x",
+		"moment": "2.13.x",
 		"mysql": "2.10.x"
 	},
 	"devDependencies": {
-		"should": "4.0.x",
+		"should": "8.x",
 
-		"grunt": "0.4.x",
-		"grunt-regarde": "*",
-		"grunt-contrib-coffee": "*",
-		"grunt-include-replace": "*",
-		"grunt-mocha-cli": "*",
-		"grunt-docker": "*"
+		"grunt": "1.x",
+		"grunt-contrib-watch": "1.x",
+		"grunt-contrib-coffee": "1.x",
+		"grunt-include-replace": "4.x",
+		"grunt-mocha-cli": "2.x",
+		"grunt-docker": "0.x"
 	}
 }

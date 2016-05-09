@@ -1,5 +1,17 @@
 # import the external modules
-_ = require('lodash')._
+_omit = require( "lodash/omit" )
+_last = require( "lodash/last" )
+_head = require( "lodash/head" )
+_map = require( "lodash/map" )
+_defaults = require( "lodash/defaults" )
+_isDate = require( "lodash/isDate" )
+_isEmpty = require( "lodash/isEmpty" )
+_isArray = require( "lodash/isArray" )
+_isNumber = require( "lodash/isNumber" )
+_isObject = require( "lodash/isObject" )
+_isString = require( "lodash/isString" )
+_isFunction = require( "lodash/isFunction" )
+
 moment = require('moment')
 async = require('async')
 bcrypt = require( "bcrypt" )
@@ -156,7 +168,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		cb = @_wrapCallback( cb )
 
-		if not filter? or not _.isObject( filter )
+		if not filter? or not _isObject( filter )
 			@_handleError( cb, "invalid-filter" )
 			return
 
@@ -178,7 +190,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 			sql.limit = filter.limit
 			if filter.offset?
 				sql.offset = filter.offset
-			filter = _.omit( filter, [ "offset", "limit" ] )
+			filter = _omit( filter, [ "offset", "limit" ] )
 		else if options?.limit?
 			sql.limit = options.limit
 			if options.offset?
@@ -204,7 +216,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 		return
 
 	_addJoin: ( sql, ownField, jSett, cb )=>
-		_.defaults jSett,
+		_defaults jSett,
 			type: "inner"
 			table: null
 			field: null
@@ -253,7 +265,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 		switch aL
 			when 4 then @update( id, data, cb, options )
 			when 3
-				if _.isFunction( data )
+				if _isFunction( data )
 					# id = data; data = cb; cb = options
 					@insert( id, data, cb )
 				else
@@ -543,9 +555,9 @@ module.exports = class MySQLTable extends require( "./basic" )
 					return
 				# add a filter for the equal test. On return there has to be a check to detect the error based on the returning data.
 				if field.type in [ "D", "date" ]
-					if _.isString( value )
+					if _isString( value )
 						_date = moment( value, sql.config.dateFormats )
-					else if _.isDate( value ) or _.isNumber( value )
+					else if _isDate( value ) or _isNumber( value )
 						_date = moment( value )
 
 					if _date? and not isNaN( parseInt(@config?.factory?.config?.timezone, 10 ))
@@ -585,7 +597,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				cb( err )
 				return
 
-			if _.isArray( results )
+			if _isArray( results )
 				if type in [ "increment", "decrement", "del" ]
 					if type is "del"
 						[ _get, _save ] = results
@@ -595,7 +607,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 						@_handleError( cb, "not-found" )
 						return
 
-					results = _.last( _get )
+					results = _last( _get )
 
 				else if type in [ "mdel" ]
 					[ _get, _save ] = results
@@ -604,7 +616,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 						return
 					results = _get
 				else
-					results = _.first( results )
+					results = _head( results )
 
 			switch type
 				when "has"
@@ -641,7 +653,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				return
 
 			if opt.fields in [ "idOnly", "idonly" ]
-				cb( null, _.pluck( results, @sIdField ) )
+				cb( null, _map( results, @sIdField ) )
 			else
 				#@emit type, id, results
 				cb( null, @builder.convertToType( results ) )
@@ -666,7 +678,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 				return
 
 			else if err?.code is "ER_DUP_ENTRY"
-				for _field, _val of options._afterSave when not _.isEmpty( _val )
+				for _field, _val of options._afterSave when not _isEmpty( _val )
 					if err.message.indexOf( _val.allreadyExistend ) >= 0
 						@_handleError( cb, "validation-already-existend", { field: _field, value: options?._changedValues?[ _field ] or data[ _field ] } )
 						return
@@ -694,11 +706,11 @@ module.exports = class MySQLTable extends require( "./basic" )
 		else
 			[ _saveMeta, _new ] = results
 
-		if _new? and _.isArray( _new )
-			_new = _.first( _new )
+		if _new? and _isArray( _new )
+			_new = _head( _new )
 
-		if _old? and _.isArray( _old )
-			_old = _.first( _old )
+		if _old? and _isArray( _old )
+			_old = _head( _old )
 
 		_new = @builder.convertToType( _new )
 
@@ -708,7 +720,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 		if not id? and not @hasStringId and _saveMeta.insertId isnt _new.id
 			@_handleError( cb, "wrong-insert-return" )
 
-		for _field, _val of options._afterSave when not _.isEmpty( _val )
+		for _field, _val of options._afterSave when not _isEmpty( _val )
 			if id? and _val.checkEqualOld? and _saveMeta.affectedRows is 0
 				_errData =
 					value: options?._changedValues?[ _field ] or data[ _field ]
@@ -737,7 +749,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 					cb( @config.returnFormat( err ) )
 					return
 
-				if _.isArray( ret )
+				if _isArray( ret )
 					_ret = for item in ret
 						@config.returnFormat( null, item )
 					cb( err, _ret )

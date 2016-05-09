@@ -1,5 +1,7 @@
 module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
-	_ = require("lodash")._
+	_map = require( "lodash/map" )
+	_difference = require( "lodash/difference" )
+	
 	should = require('should')
 	moment = require('moment')
 	_startTime = Date.now() - 1000 * 60
@@ -129,7 +131,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( item.id )
 
 					_keys = Object.keys( item )
-					_.difference(_keys,fieldsTest).should.have.length(0)
+					_difference(_keys,fieldsTest).should.have.length(0)
 					
 					done()
 					return
@@ -144,7 +146,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( item.id )
 
 					_keys = Object.keys( item )
-					_.difference(_keys,fieldsTest).should.have.length(0)
+					_difference(_keys,fieldsTest).should.have.length(0)
 					done()
 					return
 				, fields: fieldsTest.join( ", " ) )
@@ -158,7 +160,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( item.id )
 
 					_keys = Object.keys( item )
-					_.difference(_keys,fieldsTest).should.have.length(0)
+					_difference(_keys,fieldsTest).should.have.length(0)
 					done()
 					return
 				, fields: "set:test" )
@@ -171,7 +173,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					throw err if err
 					should.exist( item.id )
 					_keys = Object.keys( item )
-					_.difference(_keys,allFields).should.have.length(0)
+					_difference(_keys,allFields).should.have.length(0)
 					done()
 					return
 				, fields: "all" )
@@ -185,7 +187,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( item.id )
 
 					_keys = Object.keys( item )
-					_.difference(_keys,allFields).should.have.length(0)
+					_difference(_keys,allFields).should.have.length(0)
 					done()
 					return
 				, fields: "all" )
@@ -199,7 +201,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( item.id )
 
 					_keys = Object.keys( item )
-					_.difference(_keys,[ "id" ]).should.have.length(0)
+					_difference(_keys,[ "id" ]).should.have.length(0)
 					done()
 					return
 				, fields: "idonly" )
@@ -213,7 +215,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 					should.exist( item.id )
 
 					_keys = Object.keys( item )
-					_.difference(_keys,[ "id", "_t", "_u" ]).should.have.length(0)
+					_difference(_keys,[ "id", "_t", "_u" ]).should.have.length(0)
 					done()
 					return
 				, fields: ( (fld)->
@@ -226,7 +228,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				tableU.mget _ids, ( err, items )->
 					throw err if err
 					items.should.have.length(2)
-					_.difference(_CONFIG.test.mgetTest.id,_.pluck( items, "id" ) ).should.have.length(0)
+					_difference(_CONFIG.test.mgetTest.id,_map( items, "id" ) ).should.have.length(0)
 					done()
 					return
 
@@ -1259,7 +1261,7 @@ module.exports = ( testTitle, _CONFIG, MySQLFactory, old = false )->
 				ids = [ _usrA.id, _usrB.id ]
 				tableU.mdel( id: ids, ( err, items )->
 					throw err if err
-					_.difference(ids,_.pluck( items, "id" ) ).should.have.length(0)
+					_difference(ids,_map( items, "id" ) ).should.have.length(0)
 
 					done()
 					return

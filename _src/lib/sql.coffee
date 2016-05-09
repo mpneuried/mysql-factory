@@ -2,7 +2,25 @@
 mysql = require 'mysql'
 utils = require './utils'
 moment = require('moment')
-_ = require('lodash')._
+
+_map = require( "lodash/map" )
+_uniq = require( "lodash/uniq" )
+_pick = require( "lodash/pick" )
+_clone = require( "lodash/clone" )
+__filter = require( "lodash/filter" )
+_compact = require( "lodash/compact" )
+_template = require( "lodash/template" )
+_difference = require( "lodash/difference" )
+_intersection = require( "lodash/intersection" )
+_isDate = require( "lodash/isDate" )
+_isEmpty = require( "lodash/isEmpty" )
+_isArray = require( "lodash/isArray" )
+_isNumber = require( "lodash/isNumber" )
+_isString = require( "lodash/isString" )
+_isObject = require( "lodash/isObject" )
+_isBoolean = require( "lodash/isBoolean" )
+_isFunction = require( "lodash/isFunction" )
+
 
 # # SQLBuilder
 # ### extends [Basic](basic.coffee.html)
@@ -137,7 +155,7 @@ module.exports = ( options, escape = mysql.escape )->
 			
 			statement.push( "( #{ _keys.join( ", " )} )" ) 
 			statement.push( "VALUES ( #{ _vals.join( ", " ) } )" )
-			return _.compact( statement ).join( "\n" )
+			return _compact( statement ).join( "\n" )
 
 		###
 		## update
@@ -169,7 +187,7 @@ module.exports = ( options, escape = mysql.escape )->
 
 			statement.push @where
 
-			return _.compact( statement ).join( "\n" )
+			return _compact( statement ).join( "\n" )
 
 		###
 		## select
@@ -199,7 +217,7 @@ module.exports = ( options, escape = mysql.escape )->
 
 				statement.push @limit
 
-			return _.compact( statement ).join( "\n" )
+			return _compact( statement ).join( "\n" )
 
 		###
 		## count
@@ -220,7 +238,7 @@ module.exports = ( options, escape = mysql.escape )->
 
 			statement.push @where
 
-			return _.compact( statement ).join( "\n" )
+			return _compact( statement ).join( "\n" )
 
 
 		###
@@ -241,7 +259,7 @@ module.exports = ( options, escape = mysql.escape )->
 
 			statement.push @where
 
-			return _.compact( statement ).join( "\n" )
+			return _compact( statement ).join( "\n" )
 
 		###
 		## filter
@@ -263,7 +281,7 @@ module.exports = ( options, escape = mysql.escape )->
 			@log "debug", "filter", key, pred
 
 			# run this method recrusive if its defined as a object
-			if _.isObject( key )
+			if _isObject( key )
 				for _k, _pred of key
 					@filter( _k, _pred )
 			else
@@ -277,13 +295,13 @@ module.exports = ( options, escape = mysql.escape )->
 				if pred is null
 					# is null if pred is `null`
 					_filter += "is NULL"
-				else if _.isString( pred ) or _.isNumber( pred )
+				else if _isString( pred ) or _isNumber( pred )
 					# simple `=` filter
 					_filter += "= #{ escape( pred ) }"
-				else if _.isArray( pred )
+				else if _isArray( pred )
 					# simple `in (  )` filter
 					_filter += "in ( #{ escape( pred ) })"
-				else if _.isDate( pred )
+				else if _isDate( pred )
 					# simple date filter
 					_filter += "=  #{ escape( pred.toString() ) }"
 				else
@@ -303,7 +321,7 @@ module.exports = ( options, escape = mysql.escape )->
 							_filter += if _val? then "!= #{ escape( _val ) }" else "is not NULL"
 						when ">", "<", "<=", ">="
 							# `column > ?`, `column < ?`, `column >= ?` or `column <= ?` or for an array `column between ?[0] and ?[1]`
-							if _.isArray( _val )
+							if _isArray( _val )
 								_filter += "between #{ escape( _val[ 0 ] ) } and #{ escape( _val[ 1 ] ) }"
 							else
 								_filter += "#{ _operand } #{ escape( _val ) }"
@@ -318,7 +336,7 @@ module.exports = ( options, escape = mysql.escape )->
 							_filter += "like #{ escape( _val + "%" ) }"
 						when "in"
 							# `column in ( ?[0], ?[1], ... ?[n] )`
-							if not _.isArray( _val )
+							if not _isArray( _val )
 								_val = [ _val ]
 							_filter += "in ( #{ escape( _val ) })"
 
@@ -353,7 +371,7 @@ module.exports = ( options, escape = mysql.escape )->
 				table: fSqlBuilder.table
 				foreignField: fField
 			
-			if fFilters? and not _.isEmpty( fFilters )
+			if fFilters? and not _isEmpty( fFilters )
 				@_c.filters = @_c.filters.concat( fSqlBuilder.filter( fFilters ).getFilters() )
 			return @
 
@@ -440,12 +458,12 @@ module.exports = ( options, escape = mysql.escape )->
 			value[ _lDlm..-( _lDlm + 1 ) ].split( @config.sqlSetDelimiter )
 
 		convertToType: ( key, value )=>
-			if _.isArray( key )
+			if _isArray( key )
 				_ret = []
 				for _item in key
 					_ret.push @convertToType( _item )
 				return _ret
-			else if _.isObject( key )
+			else if _isObject( key )
 				_ret = {}
 				for _key, _val of key when _key in @attrKeys
 					_ret[ _key ] = @convertToType( _key, _val )
@@ -471,7 +489,7 @@ module.exports = ( options, escape = mysql.escape )->
 								else return false
 
 						when "json", "object", "J", "O"
-							if not value? or _.isEmpty( value )
+							if not value? or _isEmpty( value )
 								return {}
 							try
 								return JSON.parse( value )
@@ -485,7 +503,7 @@ module.exports = ( options, escape = mysql.escape )->
 						when "date", "D"
 							if value is "0000-00-00" # handle special date case if the date is 0 return as not defined
 								return null
-							if _.isDate( value )
+							if _isDate( value )
 								return value
 							else
 								return moment( value, @config.dateFormats ).toDate()
@@ -651,7 +669,7 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		setOrderField: ( fields )=>
-			if _.isArray( fields )
+			if _isArray( fields )
 				@_c.orderBy = fields
 			else
 				@_c.orderBy = for fld in fields.split( "," )
@@ -686,7 +704,7 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		setForward: ( dir )=>
-			if _.isBoolean( dir )
+			if _isBoolean( dir )
 				@_c.forward = dir
 			else
 				if dir.toLowerCase() is "desc"
@@ -769,21 +787,21 @@ module.exports = ( options, escape = mysql.escape )->
 		@api private
 		###
 		setFields: ( _fields = @config.fields, special = false )=>
-			if _.isFunction( _fields )
-				setfields = _.pluck( _.filter(@attrs, _fields ), "name" )
+			if _isFunction( _fields )
+				setfields = _map( __filter(@attrs, _fields ), "name" )
 			else if _fields in  [ "all", "*" ]
 				setfields = @_c.fieldlist
 			else if _fields in [ "idOnly", "idonly" ]
 				setfields = [@idField]
 			else if @usefieldsets and _fields[..3] is "set:" and @_c.fieldsets[ _fields[4..] ]?
 				setfields =  @_c.fieldsets[ _fields[4..] ]
-			else if _.isArray( _fields )
+			else if _isArray( _fields )
 				setfields = _fields
 			else
 				setfields = _fields.split( "," )
 
 			if not special and @_c.attrNames.length
-				@_c.fields = _.intersection( setfields, @_c.attrNames )
+				@_c.fields = _intersection( setfields, @_c.attrNames )
 			else
 				@_c.fields = setfields
 			return
@@ -824,7 +842,7 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		getFieldNames: =>
 			if @_c.fields?.length
-				_.clone( @_c.fields )
+				_clone( @_c.fields )
 			else
 				[]
 
@@ -970,8 +988,8 @@ module.exports = ( options, escape = mysql.escape )->
 		###
 		_validateAttributes: ( isCreate, attrs )=>
 			_keys = @attrKeys
-			_omited = _.difference( Object.keys( attrs ),_keys )
-			attrs = _.pick( attrs, _keys )
+			_omited = _difference( Object.keys( attrs ),_keys )
+			attrs = _pick( attrs, _keys )
 			if _omited.length
 				@info "validateAttributes", "You tried to save a attribute not defined in the model config of `#{ @table }`", _omited
 			else
@@ -1018,7 +1036,7 @@ module.exports = ( options, escape = mysql.escape )->
 				if _cnf and not _cnf.readonly
 					switch _cnf.type
 						when "string", "S"
-							if _val? and not _.isString( _val )
+							if _val? and not _isString( _val )
 								_val = _val.toString()
 
 							# create regular values
@@ -1034,7 +1052,7 @@ module.exports = ( options, escape = mysql.escape )->
 							# create regular values
 							if not _val?
 								_vals.push( "NULL" )
-							else if _.isString( _val ) and _val?[ ..2 ] is "IF("
+							else if _isString( _val ) and _val?[ ..2 ] is "IF("
 								_vals.push( _val )
 							else if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()*1000" )
@@ -1042,7 +1060,7 @@ module.exports = ( options, escape = mysql.escape )->
 								_vals.push( "IF( #{ _key } is NULL, 0, #{ _key } + 1 )" )
 							else if _val is "decr"
 								_vals.push( "IF( #{ _key } is NULL, 0, #{ _key } - 1 )" )
-							else if _.isString( _val ) and _val?[ ..3 ] is "crmt"
+							else if _isString( _val ) and _val?[ ..3 ] is "crmt"
 								_count = parseInt( _val[4..], 10 )
 								_operand = "+"
 								if isNaN( _count )
@@ -1072,12 +1090,12 @@ module.exports = ( options, escape = mysql.escape )->
 						when "timestamp", "T"
 							if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()*1000" )
-							else if _.isDate( _val )
+							else if _isDate( _val )
 								_vals.push( Math.round( _val.getTime() ) )
-							else if _.isString( _val )
+							else if _isString( _val )
 								_d = moment( _val, _cnf.dateFormat or @config.dateFormats )
 								_vals.push( _d.valueOf() )
-							else if _.isNumber( _val )
+							else if _isNumber( _val )
 								# convert s timestamp to ms
 								if _val.toString().length is 10
 									_vals.push( Math.round( _val * 1000 ) )
@@ -1090,12 +1108,12 @@ module.exports = ( options, escape = mysql.escape )->
 						when "unixtimestamp", "U"
 							if _val is "now"
 								_vals.push( "UNIX_TIMESTAMP()" )
-							else if _.isDate( _val )
+							else if _isDate( _val )
 								_vals.push( Math.round( _val.getTime() / 1000 ) )
-							else if _.isString( _val )
+							else if _isString( _val )
 								_d = moment( _val, _cnf.dateFormat or @config.dateFormats )
 								_vals.push( _d.unix() )
-							else if _.isNumber( _val )
+							else if _isNumber( _val )
 								# convert ms timestamp to s
 								if _val.toString().length is 13
 									_vals.push( Math.round( _val / 1000 ) )
@@ -1110,10 +1128,10 @@ module.exports = ( options, escape = mysql.escape )->
 							if _val is "now"
 								_val = new Date()
 
-							if _.isDate( _val )
+							if _isDate( _val )
 								_vals.push( escape( _val ) )
 								_keys.push( _key )
-							else if _.isDate( ( _m = moment( _val, @config.dateFormats ) )?._d )
+							else if _isDate( ( _m = moment( _val, @config.dateFormats ) )?._d )
 								_vals.push( escape( _m.format( "YYYY-MM-DD HH:mm" ) ) )
 								_keys.push( _key )
 
@@ -1129,9 +1147,9 @@ module.exports = ( options, escape = mysql.escape )->
 
 		# **_generateSetCommandTmpls** *Object* Underscore templates for the set sql commands. Used by the method `_generateSetCommand`
 		_generateSetCommandTmpls:
-			add: _.template( 'IF( INSTR( <%= set %>,"<%= val %><%= dlm %>") = 0, "<%= val %><%= dlm %>", "" )' )
-			rem: _.template( 'REPLACE( <%= set %>, "<%= dlm %><%= val %><%= dlm %>", "<%= dlm %>")' )
-			set: _.template( 'IF( <%= key %> is NULL,"<%= dlm %>", <%= key %>)' )
+			add: _template( 'IF( INSTR( <%= set %>,"<%= val %><%= dlm %>") = 0, "<%= val %><%= dlm %>", "" )' )
+			rem: _template( 'REPLACE( <%= set %>, "<%= dlm %><%= val %><%= dlm %>", "<%= dlm %>")' )
+			set: _template( 'IF( <%= key %> is NULL,"<%= dlm %>", <%= key %>)' )
 
 		###
 		## _generateSetCommand
@@ -1157,7 +1175,7 @@ module.exports = ( options, escape = mysql.escape )->
 				escape( dlm )
 			
 			# set by array
-			else if _.isArray( inp )
+			else if _isArray( inp )
 				if not inp.length
 					# set empty by empty array
 					escape( dlm )
@@ -1166,9 +1184,9 @@ module.exports = ( options, escape = mysql.escape )->
 					escape( dlm + inp.join( dlm ) + dlm )
 
 			# set by object
-			else if _.isObject( inp )
+			else if _isObject( inp )
 				if inp[ "$reset" ]
-					if _.isArray( inp[ "$reset" ] )
+					if _isArray( inp[ "$reset" ] )
 						# reset by $reset with an array
 						escape( dlm + inp[ "$reset" ].join( dlm ) + dlm )
 					else
@@ -1190,8 +1208,8 @@ module.exports = ( options, escape = mysql.escape )->
 					# $add command by concat the current value with the new value expressions
 					if inp[ "$add" ]?
 						# if the content is an array generate multiple add statements
-						if _.isArray( inp[ "$add" ] )
-							for _inp in _.uniq( inp[ "$add" ] )
+						if _isArray( inp[ "$add" ] )
+							for _inp in _uniq( inp[ "$add" ] )
 								# set added flag to detect any changes
 								added.push( _inp )
 								_add.push( @_generateSetCommandTmpls.add( val:_inp, set:_set, dlm:dlm ) )
@@ -1206,8 +1224,8 @@ module.exports = ( options, escape = mysql.escape )->
 					# $rem command by nesting replace commands
 					if inp[ "$rem" ]?
 						# if the content is an array generate multiple rem statements
-						if _.isArray( inp[ "$rem" ] )
-							for _inp in _.difference( _.uniq( inp[ "$rem" ] ), added )
+						if _isArray( inp[ "$rem" ] )
+							for _inp in _difference( _uniq( inp[ "$rem" ] ), added )
 								# set usedRem to detect any removes
 								usedRem = true
 								_set = @_generateSetCommandTmpls.rem( val:_inp, set:_set, dlm:dlm )

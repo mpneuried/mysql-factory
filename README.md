@@ -11,6 +11,7 @@ MySQL ORM solution to simplify the usage of the mysql connector.
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|1.1.0|2016-07-08|Added `_customQueryFilter` option to teh methods `.get`, `.mget`, `.has`, `.del` and `._update` |
 |1.0.0|2016-05-09|String-ID with numbers; Updated dependencies. Especially lodash to 4.x|
 
 [![NPM](https://nodei.co/npm-dl/mysql-factory.png?months=6)](https://nodei.co/npm/mysql-factory/)

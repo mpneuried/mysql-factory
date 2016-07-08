@@ -149,7 +149,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 
 		if options.fields?
 			sql.fields = options.fields
-
+			
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
+			
 		sql.filter( @sIdField, id )
 
 		@factory.exec( sql.select( false ), @_handleSingle( "get", id, opt, cb ) )
@@ -172,7 +175,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 			sql.limit = options.limit
 			if options.offset?
 				sql.offset = options.offset
-
+			
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
+			
 		sql.filter( @sIdField, ids )
 
 		@factory.exec( sql.select(), @_handleList( "mget", ids, opt, sql, cb ) )
@@ -343,7 +349,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 		options = @_getOptions( opt, "has" )
 
 		sql = @builder.clone()
-
+		
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
+		
 		sql.filter( @sIdField, id )
 
 		@factory.exec( sql.count(), @_handleSingle( "has", id, opt, cb ) )
@@ -392,7 +401,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 		options = @_getOptions( opt, "count" )
 
 		sql = @builder.clone()
-
+		
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
+		
 		sql.filter( @sIdField, id )
 		stmts = [ sql.select( false ), sql.del() ]
 
@@ -464,7 +476,10 @@ module.exports = class MySQLTable extends require( "./basic" )
 		{ id, data, sql, options } = args
 
 		@debug "update", id, data
-
+		
+		if options._customQueryFilter?
+			sql.filter( options._customQueryFilter )
+		
 		sql.filter( @sIdField, id )
 		
 		_getStmt = @builder.clone().filter( @sIdField, id ).select( false )

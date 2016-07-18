@@ -238,13 +238,23 @@ describe "----- MySQL Factory TESTS -----", ->
 				return
 
 			return
+			
+		it "TABLE.FIND all", ( done )->
+			@timeout( 6000 )
+			tableU.find {}, ( err, items )->
+				throw err if err
+				items.should.have.length( _CONFIG.tables.Users.limit)
+				done()
+				return
 
-		it "TABLE.FIND", ( done )->
+			return
+			
+		it "TABLE.FIND query", ( done )->
 			@timeout( 6000 )
 			query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 			tableU.find query, ( err, items )->
 				throw err if err
-				items.should.have.length(6)
+				items.should.have.length( 6 )
 				done()
 				return
 

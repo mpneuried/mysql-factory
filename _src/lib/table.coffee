@@ -42,6 +42,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 			sortfield: "id"
 			sortdirection: "decs"
 			fields: {}
+			# default limit
+			limit: 1000
 
 			createIdString: @_defaultIdString
 			defaultBcryptRounds: 8
@@ -73,7 +75,7 @@ module.exports = class MySQLTable extends require( "./basic" )
 			return @settings.defaultStringIdLength or @config.defaultStringIdLength
 		
 		@define( "limit", ( =>@builder.defaultLimit ), ( ( _limit )=>@builder.defaultLimit = _limit ) )
-
+		
 		@info "init table", @tablename, @sIdField
 
 		return
@@ -118,7 +120,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 		SQLBuilder = ( require( "./sql" ) )( logging: @config.logging, @escape )
 
 		@builder = new SQLBuilder()
-			
+		
+		
 		@builder.table = @tablename
 
 		@builder.idField = @sIdField
@@ -132,6 +135,8 @@ module.exports = class MySQLTable extends require( "./basic" )
 		@builder.orderfield = @sortfield
 
 		@builder.forward = @sortdirection
+		
+		@builder.limit = @settings.limit if @settings.limit?
 
 		return
 

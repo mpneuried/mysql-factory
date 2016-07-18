@@ -75,6 +75,7 @@ module.exports  =
 			# database fields
 			sortfield: "firstname,lastname"
 			sortdirection: "asc"
+			limit: 666
 			fields:
 				"id": 				{ name: "id",			fieldsets: [ "ls", "det", "test" ], search: false, type: "string" }
 				"thirdparty_id": 	{ name: "thirdparty_id",fieldsets: [ "det" ], search: false, type: "string" }

@@ -21,7 +21,7 @@ module.exports = (grunt) ->
 				require: [ "should" ]
 				reporter: "spec"
 				bail: false
-				timeout: 3000
+				timeout: 5000
 				slow: 3
 
 			main: [ "test/general.js" ]

@@ -11,6 +11,7 @@ MySQL ORM solution to simplify the usage of the mysql connector.
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|1.2.1|2016-08-10|Fixed empty id list in mget|
 |1.2.0|2016-07-18|Added table default limit configuration|
 |1.1.0|2016-07-08|Added `_customQueryFilter` option to teh methods `.get`, `.mget`, `.has`, `.del` and `._update` |
 |1.0.0|2016-05-09|String-ID with numbers; Updated dependencies. Especially lodash to 4.x|

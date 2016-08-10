@@ -4,7 +4,7 @@
 	"description": "ORM solution for mysql. Has been poirted form an internal project to open-source by updateing to the newest node-mysql version.",
 	"keywords": [ "mysql", "orm", "model", "factory", "table", "crud", "db", "database", "simple" ],
 	"tags": [ "mysql", "orm", "model", "factory", "table", "crud", "db", "database", "simple" ],
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"homepage": "http://mpneuried.github.com/mysql-factory/",
 	"repository": {
 		"type": "git",
@@ -19,7 +19,7 @@
  	"main": "./index.js",
 	"dependencies": {
 		"extend": "3.0.x",
-		"async": "1.5.x",
+		"async": "2.0.x",
 		"colors": "1.1.x",
 		"lodash": "4.x",
 		"bcrypt": "0.8.x",
@@ -27,12 +27,12 @@
 		"mysql": "2.11.x"
 	},
 	"devDependencies": {
-		"should": "9.x",
+		"should": "11.x",
 
 		"grunt": "1.x",
 		"grunt-contrib-watch": "1.x",
 		"grunt-contrib-coffee": "1.x",
-		"grunt-include-replace": "4.x",
+		"grunt-include-replace": "5.x",
 		"grunt-mocha-cli": "2.x"
 	}
 }

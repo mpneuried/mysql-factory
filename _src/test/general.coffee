@@ -239,6 +239,16 @@ describe "----- MySQL Factory TESTS -----", ->
 
 			return
 			
+		it "TABLE.MGET empty", ( done )->
+
+			tableU.mget [], ( err, items )->
+				throw err if err
+				items.should.have.length(0)
+				done()
+				return
+
+			return
+			
 		it "TABLE.FIND all", ( done )->
 			@timeout( 6000 )
 			tableU.find {}, ( err, items )->

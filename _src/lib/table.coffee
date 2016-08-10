@@ -165,7 +165,12 @@ module.exports = class MySQLTable extends require( "./basic" )
 		return
 
 	mget: ( ids, cb, opt = {} )=>
-
+		
+		# on a undefined or empty list respond imediate
+		if not ids?.length
+			cb( null, [] )
+			return
+			
 		cb = @_wrapCallback( cb )
 
 		# get the standard options

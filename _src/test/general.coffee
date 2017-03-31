@@ -568,6 +568,28 @@ describe "----- MySQL Factory TESTS -----", ->
 				done()
 				return
 			return
+			
+		it "TABLE.FIND with complex filter", ( done )->
+			ts = 1490951840000
+			query =
+				user_id: "Dwrpf"
+				_t: { ">": ts }
+
+			opt =
+				limit: 3
+			
+			tableT.find( query, ( err, items )->
+				throw err if err
+				items.should.have.property( "length" ).and.be.above(1)
+				items.should.have.property( "length" ).and.be.below(4)
+				for item in items
+					item._t.should.be.above( ts )
+				done()
+				return
+			, opt )
+			return
+			
+			
 
 		it "TABLE.INSERT string-id", ( done )->
 			data =

@@ -570,7 +570,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			return
 			
 		it "TABLE.FIND with complex filter", ( done )->
-			ts = 1490951840000
+			ts = 1381322463000
 			query =
 				user_id: "Dwrpf"
 				_t: { ">": ts }

@@ -810,7 +810,7 @@ describe "----- MySQL Factory TESTS -----", ->
 				throw err if err
 
 				item.should.have.property('lastname').and.equal( "Update2" )
-				item.should.have.property('password').and.containEql( "$2a$10$" )
+				item.should.have.property('password').and.containEql( "$2b$10$" )
 
 				item.should.have.property('_u').and.equal( 2 )
 				item.should.have.property('_t').and.be.within( _saveUserT, +Infinity )

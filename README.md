@@ -11,6 +11,7 @@ MySQL ORM solution to simplify the usage of the mysql connector.
 ## Release History
 |Version|Date|Description|
 |:--:|:--:|:--|
+|2.0.0|2018-12-08|Updated dependencies and require at least node 10|
 |1.2.2|2017-08-10|Updated dependencies|
 |1.2.1|2016-08-10|Fixed empty id list in mget|
 |1.2.0|2016-07-18|Added table default limit configuration|

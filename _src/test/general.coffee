@@ -264,7 +264,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			query = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
 			tableU.find query, ( err, items )->
 				throw err if err
-				items.should.have.length( 6 )
+				items.should.have.length( _CONFIG.test.findTest.count )
 				done()
 				return
 
@@ -572,7 +572,7 @@ describe "----- MySQL Factory TESTS -----", ->
 		it "TABLE.FIND with complex filter", ( done )->
 			ts = 1381322463000
 			query =
-				user_id: "Dwrpf"
+				user_id: _CONFIG.test.mgetTest.id[1]
 				_t: { ">": ts }
 
 			opt =
@@ -995,7 +995,7 @@ describe "----- MySQL Factory TESTS -----", ->
 		it "TABLE.UPDATE with existing `mail`", ( done )->
 			data =
 				lastname: "Update7"
-				email: "testmilon@test.de"
+				email: "	"
 				_t: _saveUserT
 
 			tableU.set( _saveUserId, data, ( err, item )->
@@ -1008,7 +1008,7 @@ describe "----- MySQL Factory TESTS -----", ->
 
 
 				should.exist( err.value )
-				err.value.should.equal( "testmilon@test.de" )
+				err.value.should.equal( "	" )
 				
 				done()
 				return
@@ -1134,13 +1134,12 @@ describe "----- MySQL Factory TESTS -----", ->
 			return
 
 		it "TABLE.COUNT", ( done )->
-			filter =
-				firstname: "Maxi"
-				role: "TRAINER"
+			filter = JSON.parse( JSON.stringify( _CONFIG.test.findTest.q ) )
+
 			tableU.count( filter, ( err, count )->
 				throw err if err
 				should.exist( count )
-				count.should.equal( 6 )
+				count.should.equal( _CONFIG.test.findTest.count  )
 				done()
 				return
 			, {} )

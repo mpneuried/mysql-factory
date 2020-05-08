@@ -8,7 +8,7 @@ module.exports  =
 		user: if _envVars.MYSQLFAC_TEST_USER? then _envVars.MYSQLFAC_TEST_USER else 'root'
 		password : if _envVars.MYSQLFAC_TEST_PW? then _envVars.MYSQLFAC_TEST_PW else 'root'
 		database: if _envVars.MYSQLFAC_TEST_DB? then _envVars.MYSQLFAC_TEST_DB else "mysql-factory-test"
-		timezone: "+0200"
+		timezone: "+0100"
 		logging:
 			severity: "warning"
 	###
@@ -44,12 +44,13 @@ module.exports  =
 			id: "Dwrpf"
 
 		mgetTest:
-			id: [ "Dwrpf", "RkCIA" ]
+			id: [ "Dwrpf", "FqrRF" ]
 
 		findTest:
 			q:
-				firstname: "Maxi"
-				role: "TRAINER"
+				firstname: "Tester"
+				role: "USER"
+			count: 2
 
 		contractsTable: "Contracts"
 
@@ -75,7 +76,7 @@ module.exports  =
 			# database fields
 			sortfield: "firstname,lastname"
 			sortdirection: "asc"
-			limit: 666
+			limit: 500
 			fields:
 				"id": 				{ name: "id",			fieldsets: [ "ls", "det", "test" ], search: false, type: "string" }
 				"thirdparty_id": 	{ name: "thirdparty_id",fieldsets: [ "det" ], search: false, type: "string" }

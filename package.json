@@ -1,7 +1,7 @@
 {
 	"author": "mp <mp@tcs.de> (www.tcs.de)",
 	"name": "mysql-factory",
-	"description": "ORM solution for mysql. Has been poirted form an internal project to open-source by updateing to the newest node-mysql version.",
+	"description": "ORM solution for mysql. Has been ported form an internal project to open-source by updateing to the newest node-mysql version.",
 	"keywords": [
 		"mysql",
 		"orm",

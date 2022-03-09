@@ -62,7 +62,7 @@ module.exports = ( options, escape = mysql.escape )->
 			@_c.fieldsets or= {}
 			@_c.fieldlist or= []
 			@_c.joins or= []
-
+			
 			super( options )
 			return
 
@@ -1142,7 +1142,12 @@ module.exports = ( options, escape = mysql.escape )->
 								_vals.push( _setval )
 								_keys.push( _key )
 							@log "debug", "setCommand", _setval, _val, _key
-			return [ _keys, _vals ]
+
+			
+			# wrap all fields with ` to prevent errors with colliding reserved words
+			_fixed_keys = _keys.map( (key) -> "`#{key}`" )
+			
+			return [ _fixed_keys, _vals ]
 
 		# **_generateSetCommandTmpls** *Object* Underscore templates for the set sql commands. Used by the method `_generateSetCommand`
 		_generateSetCommandTmpls:

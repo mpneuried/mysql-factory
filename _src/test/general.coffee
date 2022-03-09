@@ -253,7 +253,8 @@ describe "----- MySQL Factory TESTS -----", ->
 			@timeout( 6000 )
 			tableU.find {}, ( err, items )->
 				throw err if err
-				items.should.have.length( _CONFIG.tables.Users.limit)
+				
+				items.length.should.be.belowOrEqual( _CONFIG.tables.Users.limit)
 				done()
 				return
 
@@ -311,7 +312,7 @@ describe "----- MySQL Factory TESTS -----", ->
 
 			query =
 				token:
-					"startsWith": "desfire-801e"
+					"startsWith": _CONFIG.test.tokenStartsWith
 			opt =
 				limit: 0
 				_customQueryFilter:
@@ -322,11 +323,11 @@ describe "----- MySQL Factory TESTS -----", ->
 							filter:
 								studio_id: 1
 								contracttype: 1
-
+		
 			tableT.find( query, ( err, items )->
 				throw err if err
+				# console.log "ITEMS STD-TOKENS SUB", items.length
 				items.should.have.property( "length" ).and.be.above(1)
-				#console.log "ITEMS STD-TOKENS SUB", items.length
 				done()
 				return
 			, opt )
@@ -359,8 +360,7 @@ describe "----- MySQL Factory TESTS -----", ->
 
 			query =
 				token:
-					"startsWith": "desfire-801e"
-
+					"startsWith": _CONFIG.test.tokenStartsWith
 			
 			opt =
 				limit: 0
@@ -372,7 +372,7 @@ describe "----- MySQL Factory TESTS -----", ->
 						filter:
 							studio_id: 1
 							contracttype: 1
-
+			
 			tableT.find( query, ( err, items )->
 				throw err if err
 				items.should.have.property( "length" ).and.be.above(1)
@@ -572,7 +572,7 @@ describe "----- MySQL Factory TESTS -----", ->
 		it "TABLE.FIND with complex filter", ( done )->
 			ts = 1381322463000
 			query =
-				user_id: _CONFIG.test.mgetTest.id[1]
+				user_id: _CONFIG.test.mgetTest.id[0]
 				_t: { ">": ts }
 
 			opt =
@@ -1139,7 +1139,7 @@ describe "----- MySQL Factory TESTS -----", ->
 			tableU.count( filter, ( err, count )->
 				throw err if err
 				should.exist( count )
-				count.should.equal( _CONFIG.test.findTest.count  )
+				count.should.aboveOrEqual( _CONFIG.test.findTest.count  )
 				done()
 				return
 			, {} )

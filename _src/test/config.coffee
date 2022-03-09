@@ -44,17 +44,19 @@ module.exports  =
 			id: "Dwrpf"
 
 		mgetTest:
-			id: [ "Dwrpf", "nMZxV" ]
+			id: [ "Dwrpf", "tjMGQ" ]
 
 		findTest:
 			q:
-				firstname: "Tester"
-				role: "USER"
-			count: 2
+				firstname: "Local"
+				role: "MILON"
+			count: 1
 
 		contractsTable: "Contracts"
 
 		tokenTable: "Tokens"
+
+		tokenStartsWith: "desfire-rjVTdC"
 		insertTestToken:
 			user_id: "Dwrpf"
 			studio_id: 1

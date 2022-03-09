@@ -17,14 +17,15 @@ MYSQLFAC_TEST_USER=root MYSQLFAC_TEST_PW=abcdefgh MYSQLFAC_TEST_DB=milon_care np
 
 ## Release History
 
-| Version |    Date    | Description                                                                                     |
-| :-----: | :--------: | :---------------------------------------------------------------------------------------------- |
-|  2.0.0  | 2018-12-08 | Updated dependencies and require at least node 10                                               |
-|  1.2.2  | 2017-08-10 | Updated dependencies                                                                            |
-|  1.2.1  | 2016-08-10 | Fixed empty id list in mget                                                                     |
-|  1.2.0  | 2016-07-18 | Added table default limit configuration                                                         |
-|  1.1.0  | 2016-07-08 | Added `_customQueryFilter` option to teh methods `.get`, `.mget`, `.has`, `.del` and `._update` |
-|  1.0.0  | 2016-05-09 | String-ID with numbers; Updated dependencies. Especially lodash to 4.x                          |
+| Version |    Date    | Description                                                                                                 |
+| :-----: | :--------: | :---------------------------------------------------------------------------------------------------------- |
+|  2.0.1  | 2022-03-09 | wrap all set/insert fields definitions with ` to prevent errors with colliding reserved words; updated deps |
+|  2.0.0  | 2018-12-08 | Updated dependencies and require at least node 10                                                           |
+|  1.2.2  | 2017-08-10 | Updated dependencies                                                                                        |
+|  1.2.1  | 2016-08-10 | Fixed empty id list in mget                                                                                 |
+|  1.2.0  | 2016-07-18 | Added table default limit configuration                                                                     |
+|  1.1.0  | 2016-07-08 | Added `_customQueryFilter` option to teh methods `.get`, `.mget`, `.has`, `.del` and `._update`             |
+|  1.0.0  | 2016-05-09 | String-ID with numbers; Updated dependencies. Especially lodash to 4.x                                      |
 
 [![NPM](https://nodei.co/npm-dl/mysql-factory.png?months=6)](https://nodei.co/npm/mysql-factory/)
 

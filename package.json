@@ -24,7 +24,7 @@
 		"database",
 		"simple"
 	],
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"homepage": "http://mpneuried.github.com/mysql-factory/",
 	"repository": {
 		"type": "git",

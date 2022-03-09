@@ -1143,7 +1143,6 @@ module.exports = ( options, escape = mysql.escape )->
 								_keys.push( _key )
 							@log "debug", "setCommand", _setval, _val, _key
 			return [ _keys, _vals ]
-			return null
 
 		# **_generateSetCommandTmpls** *Object* Underscore templates for the set sql commands. Used by the method `_generateSetCommand`
 		_generateSetCommandTmpls:

@@ -44,7 +44,7 @@ module.exports  =
 			id: "Dwrpf"
 
 		mgetTest:
-			id: [ "Dwrpf", "FqrRF" ]
+			id: [ "Dwrpf", "nMZxV" ]
 
 		findTest:
 			q:

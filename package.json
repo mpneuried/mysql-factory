@@ -1,6 +1,6 @@
 {
 	"author": "mpneuried <github.com/mpneuried>",
-	"name": "@mpneuried/mysql-factory",
+	"name": "mysql-factory2",
 	"description": "ORM solution for mysql. Has been ported form an internal project to open-source by updating to the newest node-mysql version.",
 	"keywords": [
 		"mysql",

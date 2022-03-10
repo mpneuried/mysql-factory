@@ -5,7 +5,7 @@
 
 MySQL ORM solution to simplify the usage of the mysql connector.
 
-[![NPM](https://nodei.co/npm/mysql-factory.png?downloads=true&stars=true)](https://nodei.co/npm/mysql-factory/)
+[![NPM](https://nodei.co/npm/mysql-factory.png?downloads=true&stars=true)](https://nodei.co/npm/mysql-factory2/)
 
 ## Test
 
@@ -14,6 +14,10 @@ to run the test start the projects compose mysql server and call:
 ```sql
 MYSQLFAC_TEST_USER=root MYSQLFAC_TEST_PW=abcdefgh MYSQLFAC_TEST_DB=milon_care npm test
 ```
+
+## Package Info
+
+Due to login issues this `mysql-factory2` is a seconds publish of the package `mysql-factory`.
 
 ## Release History
 

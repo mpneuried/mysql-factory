@@ -12,7 +12,7 @@ MySQL ORM solution to simplify the usage of the mysql connector.
 to run the test start the projects compose mysql server and call:
 
 ```sql
-MYSQLFAC_TEST_USER=root MYSQLFAC_TEST_PW=abcdefgh MYSQLFAC_TEST_DB=milon_care npm test
+MYSQLFAC_TEST_USER=root MYSQLFAC_TEST_PW=abcdefgh MYSQLFAC_TEST_DB=db_name npm test
 ```
 
 ## Package Info

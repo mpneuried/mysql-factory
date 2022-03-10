@@ -19,7 +19,7 @@ MYSQLFAC_TEST_USER=root MYSQLFAC_TEST_PW=abcdefgh MYSQLFAC_TEST_DB=milon_care np
 
 | Version |    Date    | Description                                                                                                 |
 | :-----: | :--------: | :---------------------------------------------------------------------------------------------------------- |
-|  2.0.1  | 2022-03-09 | wrap all set/insert fields definitions with ` to prevent errors with colliding reserved words; updated deps |
+|  2.1.1  | 2022-03-09 | wrap all set/insert fields definitions with ` to prevent errors with colliding reserved words; updated deps |
 |  2.0.0  | 2018-12-08 | Updated dependencies and require at least node 10                                                           |
 |  1.2.2  | 2017-08-10 | Updated dependencies                                                                                        |
 |  1.2.1  | 2016-08-10 | Fixed empty id list in mget                                                                                 |

@@ -25,7 +25,7 @@
 		"simple"
 	],
 	"private": false,
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"homepage": "http://mpneuried.github.com/mysql-factory/",
 	"repository": {
 		"type": "git",
